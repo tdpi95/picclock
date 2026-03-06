@@ -25,3 +25,5 @@
 - [x] Wake lock release doesn't work
 - [x] Release and request new wake lock when duration change
 - [x] Dialogs don't show up in fullscreen
+- [x] picsum doens't load when storage is empty
+- [ ] Font doesn't load

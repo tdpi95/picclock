@@ -23,7 +23,7 @@ type Photo = {
 
 export default function PhotoSelector({ onClose }: PhotoSelectorProps) {
     const photoStore = useImageStore("photos");
-    const { wallpaperSettings, updateSettings } = useSettings();
+    const { wallpaperSettings, updateWallpaperSettings } = useSettings();
     const [photos, setPhotos] = useState<Photo[]>([]);
 
     const [mode, setMode] = useState<AddMode>(wallpaperSettings.uploadMode);
@@ -172,11 +172,9 @@ export default function PhotoSelector({ onClose }: PhotoSelectorProps) {
                                     onChange={(s) => {
                                         const newMode = s ? "url" : "file";
                                         setMode(newMode);
-                                        updateSettings({
-                                            wallpaper: {
-                                                ...wallpaperSettings,
-                                                uploadMode: newMode,
-                                            },
+                                        updateWallpaperSettings({
+                                            ...wallpaperSettings,
+                                            uploadMode: newMode,
                                         });
                                     }}
                                     leftIcon={<FiUpload />}

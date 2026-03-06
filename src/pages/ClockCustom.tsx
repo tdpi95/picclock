@@ -25,7 +25,7 @@ const fonts = [
 ];
 
 const ClockCustom = () => {
-    const { clockSettings, updateSettings } = useSettings();
+    const { clockSettings, updateClockSettings } = useSettings();
     const [showedPanel, setShowedPanel] = useState<"none" | "photoSelector">(
         "none",
     );
@@ -35,30 +35,15 @@ const ClockCustom = () => {
     }, [clockSettings.font]);
 
     const updateMovement = (movement: MovementType) => {
-        updateSettings({
-            clock: {
-                ...clockSettings,
-                movement,
-            },
-        });
+        updateClockSettings({ ...clockSettings, movement });
     };
 
     const updateVisible = (visible: boolean) => {
-        updateSettings({
-            clock: {
-                ...clockSettings,
-                visible,
-            },
-        });
+        updateClockSettings({ ...clockSettings, visible });
     };
 
     const update24h = (twentyFourHour: boolean) => {
-        updateSettings({
-            clock: {
-                ...clockSettings,
-                _24h: twentyFourHour,
-            },
-        });
+        updateClockSettings({ ...clockSettings, _24h: twentyFourHour });
     };
 
     const handleSelectorOpen = () => {
@@ -66,12 +51,7 @@ const ClockCustom = () => {
     };
 
     const updateFont = (font: string) => {
-        updateSettings({
-            clock: {
-                ...clockSettings,
-                font,
-            },
-        });
+        updateClockSettings({ ...clockSettings, font });
     };
 
     return (

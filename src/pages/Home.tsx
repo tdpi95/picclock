@@ -117,9 +117,7 @@ function Home() {
             setPhotoKeys(keys);
         };
 
-        const init = isInitialized;
-
-        if (init) {
+        if (isInitialized) {
             if (wallpaperSettings.imageSource === "local") {
                 loadPhotoKeys();
             } else {

@@ -10,7 +10,7 @@ import FormField from "@/components/FormField";
 type PanelType = "main" | "photoSelector" | "clockSettings";
 
 const WallpaperSettings: React.FC = () => {
-    const { wallpaperSettings, updateSettings } = useSettings();
+    const { wallpaperSettings, updateWallpaperSettings } = useSettings();
     const [showedPanel, setShowedPanel] = useState<PanelType>("main");
     const [intervalMinutes, setIntervalMinutes] = useState<number | "">(
         wallpaperSettings.imageChangeInterval / 60000,
@@ -38,11 +38,9 @@ const WallpaperSettings: React.FC = () => {
             return;
         }
 
-        updateSettings({
-            wallpaper: {
-                ...wallpaperSettings,
-                wakeLockDuration: duration,
-            },
+        updateWallpaperSettings({
+            ...wallpaperSettings,
+            wakeLockDuration: duration,
         });
     };
 
@@ -51,21 +49,14 @@ const WallpaperSettings: React.FC = () => {
 
         setIntervalMinutes(value);
 
-        updateSettings({
-            wallpaper: {
-                ...wallpaperSettings,
-                imageChangeInterval: value * 60000,
-            },
+        updateWallpaperSettings({
+            ...wallpaperSettings,
+            imageChangeInterval: value * 60000,
         });
     };
 
     const updateImageSource = (value: "picsum" | "bing" | "local") => {
-        updateSettings({
-            wallpaper: {
-                ...wallpaperSettings,
-                imageSource: value,
-            },
-        });
+        updateWallpaperSettings({ ...wallpaperSettings, imageSource: value });
     };
 
     return (

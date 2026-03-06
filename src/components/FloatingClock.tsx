@@ -1,4 +1,5 @@
 import { useSettings } from "@/context/SettingsContext";
+import { loadGoogleFont } from "@/lib/utils";
 import { useEffect, useRef } from "react";
 
 type Props = {
@@ -184,6 +185,10 @@ export default function FloatingClock({ moving = true }: Props) {
             if (rafId) cancelAnimationFrame(rafId);
         };
     }, [clockSettings, moving]);
+
+    useEffect(() => {
+        loadGoogleFont(clockSettings.font);
+    }, [clockSettings.font]);
 
     return (
         <div ref={containerRef} className="fixed">
