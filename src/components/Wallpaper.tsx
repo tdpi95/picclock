@@ -1,102 +1,68 @@
-import { useState, useEffect, forwardRef, useCallback } from "react";
+import { useState, useEffect, forwardRef, useCallback, useMemo } from "react";
 import { useSettings } from "@/context/SettingsContext";
 import { useImageStore } from "@/hooks/useImageStore";
+import { createProvider } from "@/lib/providers";
 
 interface WallpaperProps {
     onLoad?: () => void;
 }
 
-const proxy = "https://whateverorigin.org/get?url=";
-const bingUrl = encodeURIComponent(
-    "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US",
-);
-
-const getPicsumImageUrl = () => {
-    const timestamp = Date.now();
-    console.log("Get new Picsum image");
-    return `https://picsum.photos/1920/1080?random=${timestamp}`;
-};
-
-const getBingImageUrl = async () => {
-    try {
-        const bUrl = `${proxy}${bingUrl}`;
-        console.log("Fetching Bing image from: ", bUrl);
-        const response = await fetch(bUrl);
-        const data = await response.json();
-        const contents = JSON.parse(data.contents);
-        const imageUrl = contents.images[0].url;
-        return `https://www.bing.com${imageUrl}`;
-    } catch (error) {
-        console.error("Error fetching Bing image:", error);
-        return "";
-    }
-};
-
 const Wallpaper = forwardRef<HTMLDivElement, WallpaperProps>(({ onLoad }, ref) => {
-    const { wallpaperSettings, isInitialized } = useSettings();
+    const { wallpaperSettings, updateWallpaperSettings, isInitialized } = useSettings();
     const photoStore = useImageStore("photos");
-    const [photoKeys, setPhotoKeys] = useState<string[]>([]);
-    const [listIdx, setListIdx] = useState(0);
 
     const [currentImage, setCurrentImage] = useState<string | null>(null);
     const [prevImage, setPrevImage] = useState<string | null>(null);
     const [loadingImage, setLoadingImage] = useState<string | null>(null);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [showInfo, setShowInfo] = useState(false);
 
-    const getNextUrl = useCallback(async () => {
-        if (wallpaperSettings.imageSource === "local") {
-            if (photoKeys.length === 0) return null;
-            const nextIdx = (listIdx + 1) % photoKeys.length;
-            const url = await photoStore.getOriginalURL(photoKeys[nextIdx]);
-            setListIdx(nextIdx);
-            console.log("Loading local image:", url);
-            return url;
-        } else if (wallpaperSettings.imageSource === "picsum") {
-            return getPicsumImageUrl();
-        } else if (wallpaperSettings.imageSource === "bing") {
-            return getBingImageUrl();
-        }
-        return null;
-    }, [wallpaperSettings.imageSource, photoKeys, listIdx, photoStore]);
+    const providerContext = useMemo(() => ({
+        settings: wallpaperSettings,
+        updateWallpaperSettings,
+        store: photoStore
+    }), [wallpaperSettings, updateWallpaperSettings, photoStore]);
+
+    const provider = useMemo(() => 
+        createProvider(wallpaperSettings.imageSource, providerContext),
+    [wallpaperSettings.imageSource, providerContext]);
 
     const handleNext = useCallback(() => {
-        getNextUrl().then((url) => {
+        if (!provider) return;
+        provider.next().then((url) => {
             if (url) setLoadingImage(url);
         });
-    }, [getNextUrl]);
+    }, [provider]);
+
+    useEffect(() => {
+        let timeout: ReturnType<typeof setTimeout>;
+        if (showInfo) {
+            timeout = setTimeout(() => setShowInfo(false), 5000);
+        }
+        return () => clearTimeout(timeout);
+    }, [showInfo]);
+
+    const handleInteraction = useCallback(() => {
+        if (wallpaperSettings.imageSource === "bing") {
+            setShowInfo(true);
+        }
+    }, [wallpaperSettings.imageSource]);
 
     useEffect(() => {
         if (!isInitialized) return;
-
-        const loadPhotoKeys = async () => {
-            const keys = await photoStore.getAllKeys();
-            setPhotoKeys(keys);
-        };
-
-        if (wallpaperSettings.imageSource === "local") {
-            loadPhotoKeys();
-        } else {
-            handleNext();
-        }
-    }, [wallpaperSettings.imageSource, isInitialized, photoStore, handleNext]);
-
-    useEffect(() => {
-        if (photoKeys.length > 0) {
-            handleNext();
-        }
-    }, [photoKeys]);
+        handleNext();
+    }, [provider, isInitialized, handleNext]);
 
     useEffect(() => {
         if (!isInitialized) return;
 
         let refreshMillis = 0;
         switch (wallpaperSettings.imageSource) {
-            case "picsum":
-            case "local":
-                refreshMillis = wallpaperSettings.imageChangeInterval;
-                break;
             case "bing":
                 refreshMillis = 60 * 60 * 1000; // 1 hour
+                break;
+            default:
+                refreshMillis = wallpaperSettings.imageChangeInterval;
                 break;
         }
 
@@ -114,10 +80,9 @@ const Wallpaper = forwardRef<HTMLDivElement, WallpaperProps>(({ onLoad }, ref) =
         setIsTransitioning(true);
         onLoad?.();
         
-        // Reset transitioning state after animation completes
         setTimeout(() => {
             setIsTransitioning(false);
-            setPrevImage(null); // Clear previous image after transition
+            setPrevImage(null);
         }, 1500);
     };
 
@@ -137,7 +102,11 @@ const Wallpaper = forwardRef<HTMLDivElement, WallpaperProps>(({ onLoad }, ref) =
     };
 
     return (
-        <div ref={ref} className="absolute inset-0 overflow-hidden">
+        <div 
+            ref={ref} 
+            className="absolute inset-0 overflow-hidden"
+            onClick={handleInteraction}
+        >
             {prevImage && (
                 <img
                     key={`prev-${prevImage}`}
@@ -161,6 +130,20 @@ const Wallpaper = forwardRef<HTMLDivElement, WallpaperProps>(({ onLoad }, ref) =
                     onLoad={handleLoad}
                     alt=""
                 />
+            )}
+
+            {/* Bing info box */}
+            {wallpaperSettings.imageSource === "bing" && wallpaperSettings.bing && (
+                <div className={`absolute top-6 left-6 max-w-sm transition-opacity duration-500 ${showInfo ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+                    <div className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                        <h3 className="text-lg font-semibold leading-tight mb-1">
+                            {wallpaperSettings.bing.title}
+                        </h3>
+                        <p className="text-xs text-white/90 line-clamp-2">
+                            {wallpaperSettings.bing.desc}
+                        </p>
+                    </div>
+                </div>
             )}
         </div>
     );

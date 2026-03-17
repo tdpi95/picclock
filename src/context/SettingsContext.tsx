@@ -29,7 +29,7 @@ export interface WallpaperSettings {
     wakeLockDuration: number;
     transitionType: TransitionType;
     bing?: {
-        lastFetch: Date;
+        lastFetch: number;
         imgUrl: string;
         title: string;
         desc: string;
