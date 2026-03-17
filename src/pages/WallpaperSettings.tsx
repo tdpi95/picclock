@@ -59,6 +59,10 @@ const WallpaperSettings: React.FC = () => {
         updateWallpaperSettings({ ...wallpaperSettings, imageSource: value });
     };
 
+    const updateTransitionType = (value: "fade" | "slide" | "zoom") => {
+        updateWallpaperSettings({ ...wallpaperSettings, transitionType: value });
+    };
+
     return (
         <div className="p-4">
             <FieldGroup>
@@ -66,7 +70,6 @@ const WallpaperSettings: React.FC = () => {
                     <RadioGroup
                         value={wallpaperSettings.imageSource}
                         onValueChange={updateImageSource}
-                        className="mt-3"
                     >
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="picsum" id="picsum" />
@@ -112,6 +115,26 @@ const WallpaperSettings: React.FC = () => {
                         min={1}
                         onValueChange={handleWakeLockValueChange}
                     />
+                </FormField>
+
+                <FormField label="Transition effect" orientation="vertical">
+                    <RadioGroup
+                        value={wallpaperSettings.transitionType}
+                        onValueChange={updateTransitionType}
+                    >
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="fade" id="fade" />
+                            <label htmlFor="fade">Fade</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="slide" id="slide" />
+                            <label htmlFor="slide">Slide</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="zoom" id="zoom" />
+                            <label htmlFor="zoom">Zoom</label>
+                        </div>
+                    </RadioGroup>
                 </FormField>
             </FieldGroup>
 

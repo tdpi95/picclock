@@ -6,6 +6,7 @@ export interface Position {
 }
 
 export type MovementType = "static" | "interval" | "continuous";
+export type TransitionType = "fade" | "slide" | "zoom";
 
 export interface ClockSettings {
     visible: boolean;
@@ -26,6 +27,7 @@ export interface WallpaperSettings {
     imageChangeInterval: number;
     uploadMode: "file" | "url";
     wakeLockDuration: number;
+    transitionType: TransitionType;
     bing?: {
         lastFetch: Date;
         imgUrl: string;
@@ -78,6 +80,7 @@ const defaultWallpaperSettings: WallpaperSettings = {
     imageChangeInterval: 300000, // 5 minutes
     uploadMode: "file",
     wakeLockDuration: -1, // disabled by default
+    transitionType: "fade",
 };
 
 const defaultClockSettings: ClockSettings = {
