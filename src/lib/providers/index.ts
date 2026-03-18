@@ -7,6 +7,7 @@ import type { ImageProvider } from "./types";
 import { PicsumProvider } from "./PicsumProvider";
 import { BingProvider } from "./BingProvider";
 import { LocalProvider } from "./LocalProvider";
+import { ImmichProvider } from "./ImmichProvider";
 import type { LocalImageStore } from "./LocalProvider";
 import type { WallpaperSettings } from "@/context/SettingsContext";
 
@@ -24,6 +25,8 @@ export function createProvider(source: string, context: ProviderContext): ImageP
             return new BingProvider(context);
         case "local":
             return new LocalProvider(context.store);
+        case "immich":
+            return new ImmichProvider(context);
         default:
             return null;
     }

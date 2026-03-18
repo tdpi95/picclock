@@ -22,6 +22,14 @@ export interface ClockSettings {
     bgBlur: boolean;
 }
 
+export interface ImmichSettings {
+    instanceUrl: string;
+    apiKey: string;
+    selectedPhotos: string[];
+    selectedAlbums: string[];
+    selectionMode: "photos" | "albums";
+}
+
 export interface WallpaperSettings {
     imageSource: string;
     imageChangeInterval: number;
@@ -34,6 +42,7 @@ export interface WallpaperSettings {
         title: string;
         desc: string;
     };
+    immich?: ImmichSettings;
 }
 
 // interface Settings {

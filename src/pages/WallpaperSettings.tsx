@@ -3,9 +3,13 @@ import { useSettings } from "../context/SettingsContext";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import PhotoSelector from "./PhotoSelector";
 import { LuImageUp } from "react-icons/lu";
+import { FiSettings } from "react-icons/fi";
 import { NumberSelect } from "@/components/NumberSelect";
 import { FieldGroup } from "@/components/ui/field";
 import FormField from "@/components/FormField";
+import { Input } from "@/components/ui/input";
+import { ImmichPhotoSelector } from "@/components/PhotoSelector/ImmichPhotoSelector";
+import { Button } from "@/components/ui/button";
 
 type PanelType = "main" | "photoSelector" | "clockSettings";
 
@@ -55,7 +59,7 @@ const WallpaperSettings: React.FC = () => {
         });
     };
 
-    const updateImageSource = (value: "picsum" | "bing" | "local") => {
+    const updateImageSource = (value: "picsum" | "bing" | "local" | "immich") => {
         updateWallpaperSettings({ ...wallpaperSettings, imageSource: value });
     };
 
@@ -86,11 +90,80 @@ const WallpaperSettings: React.FC = () => {
                             <label htmlFor="local">Local photos</label>
                             <LuImageUp
                                 onClick={() => setShowedPanel("photoSelector")}
-                                className="ml-2 cursor-pointer"
+                                className="ml-2 cursor-pointer text-amber-400 hover:text-amber-500"
                             />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="immich" id="immich" />
+                            <label htmlFor="immich">Immich</label>
+                            {wallpaperSettings.imageSource === "immich" && (
+                                <FiSettings
+                                    onClick={() => setShowedPanel("photoSelector")}
+                                    className="ml-2 cursor-pointer text-amber-400 hover:text-amber-500"
+                                />
+                            )}
                         </div>
                     </RadioGroup>
                 </FormField>
+
+                {wallpaperSettings.imageSource === "immich" && (
+                    <div className="space-y-4 pt-2 border-t mt-2">
+                        <FormField label="Instance URL" orientation="vertical">
+                            <Input
+                                placeholder="https://immich.example.com"
+                                value={wallpaperSettings.immich?.instanceUrl || ""}
+                                onChange={(e) =>
+                                    updateWallpaperSettings({
+                                        immich: {
+                                            ...(wallpaperSettings.immich || {
+                                                apiKey: "",
+                                                selectedPhotos: [],
+                                                selectedAlbums: [],
+                                                selectionMode: "photos",
+                                            }),
+                                            instanceUrl: e.target.value,
+                                        },
+                                    })
+                                }
+                            />
+                        </FormField>
+                        <FormField label="API Key" orientation="vertical">
+                            <Input
+                                type="password"
+                                placeholder="Immich API Key"
+                                value={wallpaperSettings.immich?.apiKey || ""}
+                                onChange={(e) =>
+                                    updateWallpaperSettings({
+                                        immich: {
+                                            ...(wallpaperSettings.immich || {
+                                                instanceUrl: "",
+                                                selectedPhotos: [],
+                                                selectedAlbums: [],
+                                                selectionMode: "photos",
+                                            }),
+                                            apiKey: e.target.value,
+                                        },
+                                    })
+                                }
+                            />
+                        </FormField>
+                        <div className="flex justify-end">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowedPanel("photoSelector")}
+                                disabled={
+                                    !wallpaperSettings.immich?.instanceUrl ||
+                                    !wallpaperSettings.immich?.apiKey
+                                }
+                                className="border-amber-400 text-amber-400 hover:bg-amber-400/10"
+                            >
+                                <FiSettings className="mr-2" />
+                                Select Photos/Albums
+                            </Button>
+                        </div>
+                    </div>
+                )}
 
                 {wallpaperSettings.imageSource !== "bing" && (
                     <FormField
@@ -138,9 +211,28 @@ const WallpaperSettings: React.FC = () => {
                 </FormField>
             </FieldGroup>
 
-            {showedPanel === "photoSelector" && (
-                <PhotoSelector onClose={() => setShowedPanel("main")} />
-            )}
+            {showedPanel === "photoSelector" &&
+                wallpaperSettings.imageSource === "local" && (
+                    <PhotoSelector onClose={() => setShowedPanel("main")} />
+                )}
+
+            {showedPanel === "photoSelector" &&
+                wallpaperSettings.imageSource === "immich" &&
+                wallpaperSettings.immich && (
+                    <ImmichPhotoSelector
+                        visible={true}
+                        onClose={() => setShowedPanel("main")}
+                        settings={wallpaperSettings.immich}
+                        onSelectionChange={(params) => {
+                            updateWallpaperSettings({
+                                immich: {
+                                    ...wallpaperSettings.immich!,
+                                    ...params,
+                                },
+                            });
+                        }}
+                    />
+                )}
         </div>
     );
 };
