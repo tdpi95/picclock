@@ -24,7 +24,7 @@ export interface ClockSettings {
 
 export interface ImmichSettings {
     instanceUrl: string;
-    apiKey: string;
+    apiKey: string; // This can be a share key or actual API Key
     selectedPhotos: string[];
     selectedAlbums: string[];
     selectionMode: "photos" | "albums";

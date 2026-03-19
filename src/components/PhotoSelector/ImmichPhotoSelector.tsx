@@ -25,11 +25,11 @@ export function ImmichPhotoSelector({
             const { instanceUrl, apiKey } = settings;
             if (!instanceUrl || !apiKey) return [];
             
-            const baseUrl = instanceUrl.replace(/\/$/, "");
-            try {
-                const res = await fetch(`${baseUrl}/api/albums`, {
-                    headers: { "x-api-key": apiKey },
-                });
+                const baseUrl = instanceUrl.replace(/\/$/, "");
+                try {
+                    const res = await fetch(`${baseUrl}/api/albums`, {
+                        headers: { "x-api-key": apiKey },
+                    });
                 
                 if (!res.ok) {
                     console.error("Failed to fetch albums:", res.statusText);
@@ -40,7 +40,7 @@ export function ImmichPhotoSelector({
                 return data.map((a: any) => ({
                     id: a.id,
                     name: a.albumName,
-                    thumbnailUrl: `${baseUrl}/api/assets/${a.albumThumbnailAssetId}/thumbnail?key=${apiKey}`,
+                    thumbnailUrl: `${baseUrl}/api/assets/${a.albumThumbnailAssetId}/thumbnail?apiKey=${apiKey}`,
                     assetCount: a.assetCount,
                 }));
             } catch (err) {
@@ -52,11 +52,11 @@ export function ImmichPhotoSelector({
             const { instanceUrl, apiKey } = settings;
             if (!instanceUrl || !apiKey) return [];
             
-            const baseUrl = instanceUrl.replace(/\/$/, "");
-            try {
-                const res = await fetch(`${baseUrl}/api/assets?isArchived=false`, {
-                    headers: { "x-api-key": apiKey },
-                });
+                const baseUrl = instanceUrl.replace(/\/$/, "");
+                try {
+                    const res = await fetch(`${baseUrl}/api/assets?isArchived=false`, {
+                        headers: { "x-api-key": apiKey },
+                    });
                 
                 if (!res.ok) {
                     console.error("Failed to fetch assets:", res.statusText);
@@ -68,7 +68,7 @@ export function ImmichPhotoSelector({
                 // in the selector, or maybe the first page is enough.
                 return data.slice(0, 100).map((a: any) => ({
                     id: a.id,
-                    thumbnailUrl: `${baseUrl}/api/assets/${a.id}/thumbnail?key=${apiKey}`,
+                    thumbnailUrl: `${baseUrl}/api/assets/${a.id}/thumbnail?apiKey=${apiKey}`,
                 }));
             } catch (err) {
                 console.error("Error fetching Immich photos:", err);
