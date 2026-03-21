@@ -11,7 +11,8 @@ export type ImageRecord = {
 
 export class ImageStore extends BaseIndexedDB<ImageRecord> {
     constructor(storeName: string) {
-        super("media-db", storeName, 1);
+        super("media-db", ["local", "google-photos"], 2); // Ensure all stores are created
+        this.storeName = storeName; // Use the specific store for this instance
     }
 
     // protected onUpgrade(db: IDBDatabase): void {
@@ -64,5 +65,27 @@ export class ImageStore extends BaseIndexedDB<ImageRecord> {
     async getOriginalURL(id: string): Promise<string | null> {
         const rec = await this.get(id);
         return rec ? URL.createObjectURL(rec.original) : null;
+    }
+
+    async save(id: string, file: Blob): Promise<void> {
+        const [original, thumbnail] = await Promise.all([
+            compressImage(file),
+            createThumbnail(file),
+        ]);
+
+        const existing = await this.get(id);
+
+        await this.put({
+            id,
+            original,
+            thumbnail,
+            createdAt: existing ? existing.createdAt : Date.now(),
+            updatedAt: Date.now(),
+        });
+    }
+
+    async exists(id: string): Promise<boolean> {
+        const rec = await this.get(id);
+        return !!rec;
     }
 }

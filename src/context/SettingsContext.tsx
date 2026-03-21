@@ -22,6 +22,14 @@ export interface ClockSettings {
     bgBlur: boolean;
 }
 
+export interface GooglePhotosSettings {
+    accessToken: string;
+    tokenExpiry: number; // timestamp
+    selectedPhotos: string[];
+    selectedAlbums: string[];
+    selectionMode: "photos" | "albums";
+}
+
 export interface ImmichSettings {
     instanceUrl: string;
     apiKey: string; // This can be a share key or actual API Key
@@ -43,6 +51,7 @@ export interface WallpaperSettings {
         desc: string;
     };
     immich?: ImmichSettings;
+    googlePhotos?: GooglePhotosSettings;
 }
 
 // interface Settings {

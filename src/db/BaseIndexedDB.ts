@@ -2,12 +2,14 @@ export abstract class BaseIndexedDB<T extends { id: string }> {
     protected dbName: string;
     protected storeName: string;
     protected version: number;
+    private storeNames: string[];
 
     private dbPromise: Promise<IDBDatabase>;
 
-    constructor(dbName: string, storeName: string, version: number = 1) {
+    constructor(dbName: string, storeName: string | string[], version: number = 1) {
         this.dbName = dbName;
-        this.storeName = storeName;
+        this.storeNames = Array.isArray(storeName) ? storeName : [storeName];
+        this.storeName = Array.isArray(storeName) ? storeName[0] : storeName;
         this.version = version;
         this.dbPromise = this.openDB();
     }
@@ -25,16 +27,12 @@ export abstract class BaseIndexedDB<T extends { id: string }> {
             request.onupgradeneeded = () => {
                 const db = request.result;
 
-                if (!db.objectStoreNames.contains(this.storeName)) {
-                    db.createObjectStore(this.storeName, { keyPath: "id" });
-                    console.log(`Object store '${this.storeName}' created.`);
-                }
-
-                // this.onUpgrade(
-                //     request.result,
-                //     request.transaction?.db.version || 0,
-                //     request.result.version,
-                // );
+                this.storeNames.forEach(name => {
+                    if (!db.objectStoreNames.contains(name)) {
+                        db.createObjectStore(name, { keyPath: "id" });
+                        console.log(`Object store '${name}' created.`);
+                    }
+                });
             };
 
             request.onsuccess = () => {

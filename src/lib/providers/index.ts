@@ -8,6 +8,7 @@ import { PicsumProvider } from "./PicsumProvider";
 import { BingProvider } from "./BingProvider";
 import { LocalProvider } from "./LocalProvider";
 import { ImmichProvider } from "./ImmichProvider";
+import { GooglePhotosProvider } from "./GooglePhotosProvider";
 import type { LocalImageStore } from "./LocalProvider";
 import type { WallpaperSettings } from "@/context/SettingsContext";
 
@@ -27,6 +28,8 @@ export function createProvider(source: string, context: ProviderContext): ImageP
             return new LocalProvider(context.store);
         case "immich":
             return new ImmichProvider(context);
+        case "google-photos":
+            return new GooglePhotosProvider(context);
         default:
             return null;
     }
