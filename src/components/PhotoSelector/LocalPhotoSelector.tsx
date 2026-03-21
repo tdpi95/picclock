@@ -1,9 +1,15 @@
-import { FiLink, FiPlus, FiUpload, FiX } from "react-icons/fi";
+import {
+    FiLink,
+    FiMaximize2,
+    FiPlus,
+    FiTrash2,
+    FiUpload,
+} from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { useImageStore } from "@/hooks/useImageStore";
 import IconToggle from "@/components/ui/IconToggle";
 import { useEffect, useRef, useState } from "react";
-import ImageURLForm from "./ImageURLForm";
+import ImageURLForm from "../../pages/ImageURLForm";
 import { useSettings } from "@/context/SettingsContext";
 import { generateUUID } from "@/lib/utils";
 import { Dialog } from "@/components/Dialog";
@@ -21,7 +27,7 @@ type Photo = {
     thumbUrl: string;
 };
 
-export default function PhotoSelector({ onClose }: PhotoSelectorProps) {
+export default function LocalPhotoSelector({ onClose }: PhotoSelectorProps) {
     const photoStore = useImageStore("photos");
     const { wallpaperSettings, updateWallpaperSettings } = useSettings();
     const [photos, setPhotos] = useState<Photo[]>([]);
@@ -121,7 +127,7 @@ export default function PhotoSelector({ onClose }: PhotoSelectorProps) {
             <Dialog
                 visible={true}
                 onClose={onClose}
-                header="Photo Selector"
+                header="Local Photo Selector"
                 className="sm:max-w-4xl"
                 footer={
                     <Button
@@ -130,35 +136,50 @@ export default function PhotoSelector({ onClose }: PhotoSelectorProps) {
                         className="px-8"
                         onClick={onClose}
                     >
-                        OK
+                        Done
                     </Button>
                 }
             >
                 <div className="px-6 py-2">
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {photos.map((photo, index) => (
                             <div
                                 key={photo.id}
-                                className="relative aspect-square overflow-hidden rounded-xl shadow w-30 h-30 border border-white"
+                                className="relative aspect-square overflow-hidden rounded-xl shadow border border-white"
                             >
                                 <img
                                     src={photo.thumbUrl}
                                     alt={`photo-${index}`}
                                     className="h-full w-full object-cover"
                                 />
-                                <Button
-                                    size="icon"
-                                    variant="destructive"
-                                    className="absolute top-1 right-1 h-7 w-7 rounded-full bg-destructive/70"
-                                    onClick={() => removeImage(photo.id)}
-                                >
-                                    <FiX className="h-4 w-4" />
-                                </Button>
+
+                                <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                    <button
+                                        onClick={async () => {
+                                            const url =
+                                                await photoStore.getOriginalURL(
+                                                    photo.id,
+                                                );
+                                            if (url) window.open(url, "_blank");
+                                        }}
+                                        className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white transition-colors"
+                                        title="View Original"
+                                    >
+                                        <FiMaximize2 className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={() => removeImage(photo.id)}
+                                        className="p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white transition-colors"
+                                        title="Delete"
+                                    >
+                                        <FiTrash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
                         ))}
 
                         {photos.length < MAX_IMAGES && (
-                            <div className="relative w-30 flex flex-col aspect-square items-center justify-center rounded-xl border border-white bg-white/50 text-muted-foreground shadow-md">
+                            <div className="relative flex flex-col aspect-square items-center justify-center rounded-xl border border-white bg-white/50 text-muted-foreground shadow-md">
                                 <button
                                     type="button"
                                     onClick={() => handleAddClick(mode)}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import PhotoSelector from "./PhotoSelector";
+import LocalPhotoSelector from "../components/PhotoSelector/LocalPhotoSelector";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WallpaperSettings from "./WallpaperSettings";
 import ClockCustom from "./ClockCustom";
@@ -35,7 +35,7 @@ const MainSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             </Dialog>
 
             {showedPanel === "photoSelector" && (
-                <PhotoSelector onClose={() => setShowedPanel("main")} />
+                <LocalPhotoSelector onClose={() => setShowedPanel("main")} />
             )}
         </>
     );

@@ -39,7 +39,7 @@ export const Dialog: React.FC<DialogProps> = ({
             {/* Panel */}
             <div
                 className={cn(
-                    "relative z-10 w-full sm:max-w-lg mx-4 rounded-xl bg-white/40 backdrop-blur-xl shadow-xl p-6",
+                    "relative z-10 w-full md:max-w-2xl lg:max-w-3xl mx-4 rounded-xl bg-white/40 backdrop-blur-xl shadow-xl p-6",
                     className,
                 )}
                 onClick={(e) => e.stopPropagation()}

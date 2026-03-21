@@ -59,7 +59,7 @@ const Wallpaper = forwardRef<HTMLDivElement, WallpaperProps>(({ onLoad }, ref) =
         let refreshMillis = 0;
         switch (wallpaperSettings.imageSource) {
             case "bing":
-                refreshMillis = 60 * 60 * 1000; // 1 hour
+                refreshMillis = 30 * 60 * 1000; // 30 minutes
                 break;
             default:
                 refreshMillis = wallpaperSettings.imageChangeInterval;
