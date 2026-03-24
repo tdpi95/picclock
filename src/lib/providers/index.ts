@@ -10,11 +10,13 @@ import { LocalProvider } from "./LocalProvider";
 import { ImmichProvider } from "./ImmichProvider";
 import { GooglePhotosProvider } from "./GooglePhotosProvider";
 import type { LocalImageStore } from "./LocalProvider";
-import type { WallpaperSettings } from "@/context/SettingsContext";
+import type { WallpaperSettings, ImmichSettings } from "@/context/SettingsContext";
 
 export interface ProviderContext {
     settings: WallpaperSettings;
     updateWallpaperSettings: (settings: Partial<WallpaperSettings>) => void;
+    immichSettings: ImmichSettings;
+    updateImmichSettings: (settings: Partial<ImmichSettings>) => void;
     store: LocalImageStore;
 }
 

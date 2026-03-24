@@ -22,7 +22,12 @@ type PanelType =
     | "googleDownloadedPhotos";
 
 const WallpaperSettings: React.FC = () => {
-    const { wallpaperSettings, updateWallpaperSettings } = useSettings();
+    const { 
+        wallpaperSettings, 
+        updateWallpaperSettings,
+        immichSettings,
+        updateImmichSettings
+    } = useSettings();
     const [showedPanel, setShowedPanel] = useState<PanelType>("main");
     const [isImmichSettingsOpen, setIsImmichSettingsOpen] = useState(false);
     const [intervalMinutes, setIntervalMinutes] = useState<number | "">(
@@ -355,9 +360,8 @@ const WallpaperSettings: React.FC = () => {
                                         setShowedPanel("photoSelector")
                                     }
                                     disabled={
-                                        !wallpaperSettings.immich
-                                            ?.instanceUrl ||
-                                        !wallpaperSettings.immich?.apiKey
+                                        !immichSettings?.instanceUrl ||
+                                        !immichSettings?.apiKey
                                     }
                                     className="text-amber-500"
                                 >
@@ -458,19 +462,13 @@ const WallpaperSettings: React.FC = () => {
                 )}
 
             {showedPanel === "photoSelector" &&
-                wallpaperSettings.imageSource === "immich" &&
-                wallpaperSettings.immich && (
+                wallpaperSettings.imageSource === "immich" && (
                     <ImmichPhotoSelector
                         visible={true}
                         onClose={() => setShowedPanel("main")}
-                        settings={wallpaperSettings.immich}
+                        settings={immichSettings}
                         onSelectionChange={(params) => {
-                            updateWallpaperSettings({
-                                immich: {
-                                    ...wallpaperSettings.immich!,
-                                    ...params,
-                                },
-                            });
+                            updateImmichSettings(params);
                         }}
                     />
                 )}
@@ -483,11 +481,9 @@ const WallpaperSettings: React.FC = () => {
             <ImmichSettingsDialog
                 isOpen={isImmichSettingsOpen}
                 onClose={() => setIsImmichSettingsOpen(false)}
-                settings={wallpaperSettings.immich}
+                settings={immichSettings}
                 onSave={(newImmichSettings) => {
-                    updateWallpaperSettings({
-                        immich: newImmichSettings,
-                    });
+                    updateImmichSettings(newImmichSettings);
                 }}
             />
         </div>

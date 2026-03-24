@@ -8,7 +8,13 @@ interface WallpaperProps {
 }
 
 const Wallpaper = forwardRef<HTMLDivElement, WallpaperProps>(({ onLoad }, ref) => {
-    const { wallpaperSettings, updateWallpaperSettings, isInitialized } = useSettings();
+    const { 
+        wallpaperSettings, 
+        updateWallpaperSettings, 
+        immichSettings,
+        updateImmichSettings,
+        isInitialized 
+    } = useSettings();
     const photoStore = useImageStore("photos");
 
     const [currentImage, setCurrentImage] = useState<string | null>(null);
@@ -20,8 +26,10 @@ const Wallpaper = forwardRef<HTMLDivElement, WallpaperProps>(({ onLoad }, ref) =
     const providerContext = useMemo(() => ({
         settings: wallpaperSettings,
         updateWallpaperSettings,
+        immichSettings,
+        updateImmichSettings,
         store: photoStore
-    }), [wallpaperSettings, updateWallpaperSettings, photoStore]);
+    }), [wallpaperSettings, updateWallpaperSettings, immichSettings, updateImmichSettings, photoStore]);
 
     const provider = useMemo(() => 
         createProvider(wallpaperSettings.imageSource, providerContext),

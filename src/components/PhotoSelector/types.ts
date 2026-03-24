@@ -13,5 +13,5 @@ export interface Photo {
 export interface PhotoProvider {
     name: string;
     fetchAlbums(): Promise<Album[]>;
-    fetchPhotos(): Promise<Photo[]>;
+    fetchPhotos(page?: number): Promise<Photo[]>;
 }

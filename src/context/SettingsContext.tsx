@@ -50,21 +50,16 @@ export interface WallpaperSettings {
         title: string;
         desc: string;
     };
-    immich?: ImmichSettings;
     googlePhotos?: GooglePhotosSettings;
 }
-
-// interface Settings {
-//     wallpaper: WallpaperSettings;
-//     clock: ClockSettings;
-// }
 
 interface SettingsContextType {
     wallpaperSettings: WallpaperSettings;
     updateWallpaperSettings: (newSettings: Partial<WallpaperSettings>) => void;
     clockSettings: ClockSettings;
     updateClockSettings: (newSettings: Partial<ClockSettings>) => void;
-    // updateSettings: (newSettings: Partial<Settings>) => void;
+    immichSettings: ImmichSettings;
+    updateImmichSettings: (newSettings: Partial<ImmichSettings>) => void;
     isInitialized: boolean;
 }
 
@@ -115,6 +110,14 @@ const defaultClockSettings: ClockSettings = {
     bgBlur: true,
 };
 
+const defaultImmichSettings: ImmichSettings = {
+    instanceUrl: "",
+    apiKey: "",
+    selectedPhotos: [],
+    selectedAlbums: [],
+    selectionMode: "photos",
+};
+
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
@@ -122,6 +125,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
         useState<WallpaperSettings>(defaultWallpaperSettings);
     const [clockSettings, setClockSettings] =
         useState<ClockSettings>(defaultClockSettings);
+    const [immichSettings, setImmichSettings] = useState<ImmichSettings>(
+        defaultImmichSettings,
+    );
     const [isInitialized, setInitialized] = useState(false);
 
     useEffect(() => {
@@ -144,20 +150,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
             setWallpaperSettings({ ...defaultWallpaperSettings }); // create new object to trigger effect in Home
         }
 
-        const storedClock = localStorage.getItem("clock");
-        if (storedClock) {
-            console.log("Stored clock settings:", storedClock);
+        const storedImmich = localStorage.getItem("immich");
+        if (storedImmich) {
             try {
-                const parsed = JSON.parse(storedClock);
-                setClockSettings({ ...defaultClockSettings, ...parsed });
+                const parsed = JSON.parse(storedImmich);
+                setImmichSettings({ ...defaultImmichSettings, ...parsed });
             } catch (error) {
-                console.error(
-                    "Error parsing clock settings from localStorage:",
-                    error,
-                );
+                console.error("Error parsing immich settings:", error);
             }
-        } else {
-            setClockSettings({ ...defaultClockSettings });
         }
 
         setInitialized(true);
@@ -171,7 +171,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
                 "Save wallpaper settings to localStorage:",
                 wallpaperSettings,
             );
-            localStorage.setItem("wallpaper", JSON.stringify(wallpaperSettings));
+            localStorage.setItem(
+                "wallpaper",
+                JSON.stringify(wallpaperSettings),
+            );
         }, 500);
 
         return () => clearTimeout(timeoutId);
@@ -181,12 +184,21 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!isInitialized) return;
 
         const timeoutId = setTimeout(() => {
-            console.log("Save clock settings to localStorage:", clockSettings);
             localStorage.setItem("clock", JSON.stringify(clockSettings));
         }, 500);
 
         return () => clearTimeout(timeoutId);
     }, [clockSettings, isInitialized]);
+
+    useEffect(() => {
+        if (!isInitialized) return;
+
+        const timeoutId = setTimeout(() => {
+            localStorage.setItem("immich", JSON.stringify(immichSettings));
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [immichSettings, isInitialized]);
 
     const updateWallpaperSettings = (
         newSettings: Partial<WallpaperSettings>,
@@ -198,6 +210,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
         setClockSettings((prev) => ({ ...prev, ...newSettings }));
     };
 
+    const updateImmichSettings = (newSettings: Partial<ImmichSettings>) => {
+        setImmichSettings((prev) => ({ ...prev, ...newSettings }));
+    };
+
     return (
         <SettingsContext.Provider
             value={{
@@ -205,6 +221,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
                 updateWallpaperSettings,
                 clockSettings,
                 updateClockSettings,
+                immichSettings,
+                updateImmichSettings,
                 isInitialized,
             }}
         >

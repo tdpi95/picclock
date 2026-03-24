@@ -10,10 +10,8 @@ export class ImmichProvider implements ImageProvider {
     }
 
     async next(): Promise<string | null> {
-        const { settings } = this.context;
-        if (!settings.immich) return null;
-
-        const { instanceUrl, apiKey, selectedPhotos, selectedAlbums, selectionMode } = settings.immich;
+        const { immichSettings } = this.context;
+        const { instanceUrl, apiKey, selectedPhotos = [], selectedAlbums = [], selectionMode } = immichSettings;
         if (!instanceUrl || !apiKey) return null;
 
         try {
@@ -39,11 +37,8 @@ export class ImmichProvider implements ImageProvider {
             }
 
             if (!assetId) return null;
-
-            // Using the original endpoint for high quality wallpaper
-            // Immich supports key in query for some endpoints if configured, otherwise we might need a proxy or handle CORS.
-            // For now, let's assume it works or the user handles it.
-            return `${baseUrl}/api/assets/${assetId}/original?key=${apiKey}`;
+            
+            return `${baseUrl}/api/assets/${assetId}/original?apiKey=${apiKey}`;
         } catch (error) {
             console.error("Error fetching Immich image:", error);
             return null;

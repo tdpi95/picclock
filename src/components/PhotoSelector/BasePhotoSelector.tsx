@@ -9,12 +9,12 @@ interface BasePhotoSelectorProps {
     visible: boolean;
     onClose: () => void;
     provider: PhotoProvider;
-    selectedPhotoIds: string[];
-    selectedAlbumIds: string[];
+    selectedPhotos: string[];
+    selectedAlbums: string[];
     selectionMode: "photos" | "albums";
     onSelectionChange: (params: {
-        selectedPhotoIds?: string[];
-        selectedAlbumIds?: string[];
+        selectedPhotos?: string[];
+        selectedAlbums?: string[];
         selectionMode?: "photos" | "albums";
     }) => void;
 }
@@ -23,22 +23,29 @@ export function BasePhotoSelector({
     visible,
     onClose,
     provider,
-    selectedPhotoIds,
-    selectedAlbumIds,
-    selectionMode,
+    selectedPhotos = [],
+    selectedAlbums = [],
+    selectionMode = "photos",
     onSelectionChange,
 }: BasePhotoSelectorProps) {
     const [albums, setAlbums] = useState<Album[]>([]);
     const [photos, setPhotos] = useState<Photo[]>([]);
     const [loading, setLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [photoPage, setPhotoPage] = useState(1);
+    const [hasMorePhotos, setHasMorePhotos] = useState(true);
 
     useEffect(() => {
         if (!visible) return;
         setLoading(true);
-        Promise.all([provider.fetchAlbums(), provider.fetchPhotos()])
+        setPhotoPage(1);
+        setHasMorePhotos(true);
+
+        Promise.all([provider.fetchAlbums(), provider.fetchPhotos(1)])
             .then(([albumsData, photosData]) => {
                 setAlbums(albumsData);
                 setPhotos(photosData);
+                if (photosData.length < 50) setHasMorePhotos(false); // Assume 100 is max, but be safe
             })
             .catch((err) => {
                 console.error("Failed to fetch from provider:", err);
@@ -48,18 +55,47 @@ export function BasePhotoSelector({
             });
     }, [visible, provider]);
 
+    const loadMorePhotos = async () => {
+        if (loadingMore || !hasMorePhotos || selectionMode !== "photos") return;
+
+        setLoadingMore(true);
+        const nextPage = photoPage + 1;
+
+        try {
+            const morePhotos = await provider.fetchPhotos(nextPage);
+            if (morePhotos.length === 0) {
+                setHasMorePhotos(false);
+            } else {
+                setPhotos((prev) => [...prev, ...morePhotos]);
+                setPhotoPage(nextPage);
+                if (morePhotos.length < 50) setHasMorePhotos(false);
+            }
+        } catch (err) {
+            console.error("Failed to load more photos:", err);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+        if (scrollHeight - scrollTop <= clientHeight + 100) {
+            loadMorePhotos();
+        }
+    };
+
     const togglePhoto = (id: string) => {
-        const newIds = selectedPhotoIds.includes(id)
-            ? selectedPhotoIds.filter((i) => i !== id)
-            : [...selectedPhotoIds, id];
-        onSelectionChange({ selectedPhotoIds: newIds });
+        const newIds = selectedPhotos.includes(id)
+            ? selectedPhotos.filter((i) => i !== id)
+            : [...selectedPhotos, id];
+        onSelectionChange({ selectedPhotos: newIds });
     };
 
     const toggleAlbum = (id: string) => {
-        const newIds = selectedAlbumIds.includes(id)
-            ? selectedAlbumIds.filter((i) => i !== id)
-            : [...selectedAlbumIds, id];
-        onSelectionChange({ selectedAlbumIds: newIds });
+        const newIds = selectedAlbums.includes(id)
+            ? selectedAlbums.filter((i) => i !== id)
+            : [...selectedAlbums, id];
+        onSelectionChange({ selectedAlbums: newIds });
     };
 
     return (
@@ -67,7 +103,7 @@ export function BasePhotoSelector({
             visible={visible}
             onClose={onClose}
             header={`Select from ${provider.name}`}
-            className="sm:max-w-4xl"
+            className="lg:max-w-4xl"
             footer={
                 <Button onClick={onClose} className="px-8">
                     Done
@@ -77,52 +113,59 @@ export function BasePhotoSelector({
             <Tabs
                 value={selectionMode}
                 onValueChange={(v) =>
-                    onSelectionChange({ selectionMode: v as "photos" | "albums" })
+                    onSelectionChange({
+                        selectionMode: v as "photos" | "albums",
+                    })
                 }
-                className="w-full"
             >
-                <div className="px-6 border-b">
-                    <TabsList className="bg-transparent h-12 gap-6">
-                        <TabsTrigger
-                            value="photos"
-                            className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-0 h-12"
-                        >
-                            Photos ({selectedPhotoIds.length})
-                        </TabsTrigger>
-                        <TabsTrigger
-                            value="albums"
-                            className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-0 h-12"
-                        >
-                            Albums ({selectedAlbumIds.length})
-                        </TabsTrigger>
-                    </TabsList>
-                </div>
+                <TabsList className="w-full bg-white/30">
+                    <TabsTrigger value="photos">
+                        Photos ({selectedPhotos.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="albums">
+                        Albums ({selectedAlbums.length})
+                    </TabsTrigger>
+                </TabsList>
 
-                <div className="p-6 h-[60vh] overflow-y-auto">
+                <div
+                    className="p-6 h-[60vh] overflow-y-auto"
+                    onScroll={handleScroll}
+                >
                     {loading ? (
                         <div className="flex items-center justify-center h-full">
-                            <span className="text-muted-foreground italic">Loading...</span>
+                            <span className="text-muted-foreground italic">
+                                Loading...
+                            </span>
                         </div>
                     ) : (
                         <>
-                            <TabsContent value="photos" className="mt-0 outline-none">
+                            <TabsContent
+                                value="photos"
+                                className="mt-0 outline-none"
+                            >
                                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
                                     {photos.map((photo) => (
                                         <div
                                             key={photo.id}
                                             className={`relative aspect-square cursor-pointer rounded-xl overflow-hidden border-2 transition-all group ${
-                                                selectedPhotoIds.includes(photo.id)
+                                                selectedPhotos.includes(
+                                                    photo.id,
+                                                )
                                                     ? "border-amber-400 ring-2 ring-amber-400/20 shadow-md"
                                                     : "border-transparent hover:border-amber-400/50"
                                             }`}
-                                            onClick={() => togglePhoto(photo.id)}
+                                            onClick={() =>
+                                                togglePhoto(photo.id)
+                                            }
                                         >
                                             <img
                                                 src={photo.thumbnailUrl}
                                                 className="w-full h-full object-cover transition-transform group-hover:scale-105"
                                                 alt=""
                                             />
-                                            {selectedPhotoIds.includes(photo.id) && (
+                                            {selectedPhotos.includes(
+                                                photo.id,
+                                            ) && (
                                                 <div className="absolute top-1 right-1 bg-amber-400 text-black rounded-full p-0.5 shadow-md">
                                                     <FiCheck className="w-3.5 h-3.5" />
                                                 </div>
@@ -130,6 +173,15 @@ export function BasePhotoSelector({
                                         </div>
                                     ))}
                                 </div>
+
+                                {loadingMore && (
+                                    <div className="flex justify-center py-4">
+                                        <span className="text-muted-foreground italic text-sm">
+                                            Loading more...
+                                        </span>
+                                    </div>
+                                )}
+
                                 {photos.length === 0 && !loading && (
                                     <div className="text-center py-10 text-muted-foreground">
                                         No photos found
@@ -137,17 +189,24 @@ export function BasePhotoSelector({
                                 )}
                             </TabsContent>
 
-                            <TabsContent value="albums" className="mt-0 outline-none">
+                            <TabsContent
+                                value="albums"
+                                className="mt-0 outline-none"
+                            >
                                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
                                     {albums.map((album) => (
                                         <div
                                             key={album.id}
                                             className={`relative cursor-pointer group`}
-                                            onClick={() => toggleAlbum(album.id)}
+                                            onClick={() =>
+                                                toggleAlbum(album.id)
+                                            }
                                         >
                                             <div
                                                 className={`aspect-square rounded-2xl overflow-hidden border-2 transition-all ${
-                                                    selectedAlbumIds.includes(album.id)
+                                                    selectedAlbums.includes(
+                                                        album.id,
+                                                    )
                                                         ? "border-amber-400 ring-2 ring-amber-400/20 shadow-lg"
                                                         : "border-transparent group-hover:border-amber-400/50"
                                                 }`}
@@ -157,7 +216,9 @@ export function BasePhotoSelector({
                                                     className="w-full h-full object-cover transition-transform group-hover:scale-105"
                                                     alt=""
                                                 />
-                                                {selectedAlbumIds.includes(album.id) && (
+                                                {selectedAlbums.includes(
+                                                    album.id,
+                                                ) && (
                                                     <div className="absolute top-2 right-2 bg-amber-400 text-black rounded-full p-1 shadow-lg">
                                                         <FiCheck className="w-4 h-4" />
                                                     </div>
