@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 export interface Position {
     x: number;
@@ -32,7 +32,7 @@ export interface GooglePhotosSettings {
 
 export interface ImmichSettings {
     instanceUrl: string;
-    apiKey: string; // This can be a share key or actual API Key
+    apiKey: string;
     selectedPhotos: string[];
     selectedAlbums: string[];
     selectionMode: "photos" | "albums";
@@ -67,27 +67,6 @@ const SettingsContext = createContext<SettingsContextType | undefined>(
     undefined,
 );
 
-// const defaultSettings: Settings = {
-//     wallpaper: {
-//         imageSource: "picsum",
-//         imageChangeInterval: 300000, // 5 minutes
-//         uploadMode: "file",
-//         wakeLockDuration: -1, // disabled by default
-//     },
-//     clock: {
-//         visible: true,
-//         _24h: false,
-//         movement: "continuous",
-//         moveInterval: 10000,
-//         position: { x: 100, y: 100 },
-//         color1: "#ffffff",
-//         color2: "#000000",
-//         font: "Inter",
-//         bgOpacity: 20,
-//         bgBlur: true,
-//     },
-// };
-
 const defaultWallpaperSettings: WallpaperSettings = {
     imageSource: "picsum",
     imageChangeInterval: 300000, // 5 minutes
@@ -101,7 +80,7 @@ const defaultClockSettings: ClockSettings = {
     _24h: false,
     movement: "continuous",
     moveInterval: 10000,
-    position: { x: 10, y: 10 },
+    position: { x: 100, y: 100 },
     color1: "#ffffff",
     color2: "#000000",
     font: "Inter",
@@ -115,7 +94,7 @@ const defaultImmichSettings: ImmichSettings = {
     apiKey: "",
     selectedPhotos: [],
     selectedAlbums: [],
-    selectionMode: "photos",
+    selectionMode: "albums",
 };
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -148,6 +127,22 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
             }
         } else {
             setWallpaperSettings({ ...defaultWallpaperSettings }); // create new object to trigger effect in Home
+        }
+
+        const storedClock = localStorage.getItem("clock");
+        if (storedClock) {
+            console.log("Stored clock settings:", storedClock);
+            try {
+                const parsed = JSON.parse(storedClock);
+                setClockSettings({ ...defaultClockSettings, ...parsed });
+            } catch (error) {
+                console.error(
+                    "Error parsing clock settings from localStorage:",
+                    error,
+                );
+            }
+        } else {
+            setClockSettings({ ...defaultClockSettings });
         }
 
         const storedImmich = localStorage.getItem("immich");
@@ -184,6 +179,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!isInitialized) return;
 
         const timeoutId = setTimeout(() => {
+            console.log("Save clock settings to localStorage:", clockSettings);
             localStorage.setItem("clock", JSON.stringify(clockSettings));
         }, 500);
 
@@ -200,32 +196,50 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
         return () => clearTimeout(timeoutId);
     }, [immichSettings, isInitialized]);
 
-    const updateWallpaperSettings = (
-        newSettings: Partial<WallpaperSettings>,
-    ) => {
-        setWallpaperSettings((prev) => ({ ...prev, ...newSettings }));
-    };
+    const updateWallpaperSettings = useCallback(
+        (newSettings: Partial<WallpaperSettings>) => {
+            setWallpaperSettings((prev) => ({ ...prev, ...newSettings }));
+        },
+        [],
+    );
 
-    const updateClockSettings = (newSettings: Partial<ClockSettings>) => {
-        setClockSettings((prev) => ({ ...prev, ...newSettings }));
-    };
+    const updateClockSettings = useCallback(
+        (newSettings: Partial<ClockSettings>) => {
+            setClockSettings((prev) => ({ ...prev, ...newSettings }));
+        },
+        [],
+    );
 
-    const updateImmichSettings = (newSettings: Partial<ImmichSettings>) => {
-        setImmichSettings((prev) => ({ ...prev, ...newSettings }));
-    };
+    const updateImmichSettings = useCallback(
+        (newSettings: Partial<ImmichSettings>) => {
+            setImmichSettings((prev) => ({ ...prev, ...newSettings }));
+        },
+        [],
+    );
+
+    const contextValue = useMemo(
+        () => ({
+            wallpaperSettings,
+            updateWallpaperSettings,
+            clockSettings,
+            updateClockSettings,
+            immichSettings,
+            updateImmichSettings,
+            isInitialized,
+        }),
+        [
+            wallpaperSettings,
+            updateWallpaperSettings,
+            clockSettings,
+            updateClockSettings,
+            immichSettings,
+            updateImmichSettings,
+            isInitialized,
+        ],
+    );
 
     return (
-        <SettingsContext.Provider
-            value={{
-                wallpaperSettings,
-                updateWallpaperSettings,
-                clockSettings,
-                updateClockSettings,
-                immichSettings,
-                updateImmichSettings,
-                isInitialized,
-            }}
-        >
+        <SettingsContext.Provider value={contextValue}>
             {children}
         </SettingsContext.Provider>
     );

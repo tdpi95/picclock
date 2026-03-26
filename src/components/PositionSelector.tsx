@@ -67,14 +67,19 @@ const PositionSelector = ({ visible, onConfirm, onClose }: Props) => {
         if (!containerRef.current) return;
         const rect = containerRef.current.getBoundingClientRect();
 
-        const rawX = ((clientX - rect.left) / rect.width) * 100;
-        const rawY = ((clientY - rect.top) / rect.height) * 100;
+        const rawPctX = ((clientX - rect.left) / rect.width) * 100;
+        const rawPctY = ((clientY - rect.top) / rect.height) * 100;
 
-        const snapX = applySnapping(Math.max(0, Math.min(100, rawX)));
-        const snapY = applySnapping(Math.max(0, Math.min(100, rawY)));
+        const snapX = applySnapping(Math.max(0, Math.min(100, rawPctX)));
+        const snapY = applySnapping(Math.max(0, Math.min(100, rawPctY)));
 
         setIsSnapped(snapX.snapped || snapY.snapped);
-        setPosition({ x: snapX.value, y: snapY.value });
+        
+        // Convert snapped percentage back to window pixels
+        const pixelX = (snapX.value / 100) * window.innerWidth;
+        const pixelY = (snapY.value / 100) * window.innerHeight;
+
+        setPosition({ x: Math.round(pixelX), y: Math.round(pixelY) });
     };
 
     const handleMouseMove = (e: MouseEvent) =>
@@ -142,8 +147,8 @@ const PositionSelector = ({ visible, onConfirm, onClose }: Props) => {
                         onMouseDown={() => setIsDragging(true)}
                         onTouchStart={() => setIsDragging(true)}
                         style={{
-                            left: `${position.x}%`,
-                            top: `${position.y}%`,
+                            left: `${(position.x / window.innerWidth) * 100}%`,
+                            top: `${(position.y / window.innerHeight) * 100}%`,
                             transform: "translate(-50%, -50%)",
                         }}
                         className={`
@@ -161,30 +166,14 @@ const PositionSelector = ({ visible, onConfirm, onClose }: Props) => {
                     <div className="absolute bottom-4 right-4 flex gap-4 text-[10px] font-black text-zinc-500 tracking-tighter uppercase bg-black/40 px-3 py-1 rounded-full border border-white/5 z-12">
                         <span>
                             X:{" "}
-                            <span
-                                className={
-                                    position.x === 50 ||
-                                    position.x === 0 ||
-                                    position.x === 100
-                                        ? "text-yellow-400"
-                                        : "text-zinc-300"
-                                }
-                            >
-                                {position.x}
+                            <span className="text-zinc-300">
+                                {position.x}px
                             </span>
                         </span>
                         <span>
                             Y:{" "}
-                            <span
-                                className={
-                                    position.y === 50 ||
-                                    position.y === 0 ||
-                                    position.y === 100
-                                        ? "text-yellow-400"
-                                        : "text-zinc-300"
-                                }
-                            >
-                                {position.y}
+                            <span className="text-zinc-300">
+                                {position.y}px
                             </span>
                         </span>
                     </div>

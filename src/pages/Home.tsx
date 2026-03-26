@@ -4,7 +4,8 @@ import { LuFullscreen, LuSettings } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 import { useWakeLock } from "@/hooks/useWakeLock";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import FloatingClock from "@/components/FloatingClock";
 import MainSettings from "./MainSettings";
 import Wallpaper from "@/components/Wallpaper";
@@ -26,6 +27,24 @@ function Home() {
         wallpaperSettings.wakeLockDuration,
     ]);
 
+    const handleBackgroundClick = (e: React.MouseEvent) => {
+        if (clockSettings.movement !== "static") return;
+        if (showSettings) return;
+
+        // Skip if clicking on interactive elements
+        if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("footer")) {
+            return;
+        }
+
+        toast("Tip: Drag the clock to reposition it.", {
+            id: "drag-hint",
+            description: "Click and hold the clock to move it around.",
+            duration: 3000,
+        });
+
+        window.dispatchEvent(new CustomEvent("clock-shake"));
+    };
+
     const toggleFullscreen = () => {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch((err) => {
@@ -40,7 +59,10 @@ function Home() {
     };
 
     return (
-        <div className="relative min-h-screen w-full bg-linear-to-r from-blue-500 to-teal-800">
+        <div 
+            className="relative min-h-screen w-full bg-linear-to-r from-blue-500 to-teal-800"
+            onClick={handleBackgroundClick}
+        >
             <Wallpaper ref={imgRef} />
 
             {clockSettings.visible && <FloatingClock moving={!showSettings} />}
@@ -49,7 +71,7 @@ function Home() {
                 <MainSettings onBack={() => setShowSettings(false)} />
             )}
 
-            <Toaster />
+            <Toaster position="top-right" />
 
             <Footer
                 triggerElementRef={imgRef}

@@ -82,3 +82,64 @@ Create `launch.json` in `.vscode`:
   → useful for saved settings and local photos
 - If the port or path changes, update the url field
 - Run `npm run dev -- --host` to expose in local network.
+
+---
+
+## Immich Support
+
+To use Immich as a photo source, you need to allow PicClock to fetch images from your server (CORS). The specific configuration will vary depending on your reverse proxy.
+
+Configuration example for nginx:
+
+```nginx
+if ($request_method ~* '(GET|POST)') {
+    add_header 'Access-Control-Allow-Origin' '*' always;
+    add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+    add_header 'Access-Control-Allow-Headers' 'X-Api-Key, User-Agent, Content-Type' always;
+    add_header 'Access-Control-Max-Age' 1728000;
+}
+
+if ($request_method = 'OPTIONS') {
+  add_header 'Access-Control-Allow-Origin' '*' always;
+  add_header 'Access-Control-Allow-Methods' 'GET, PUT, POST, DELETE, OPTIONS' always;
+  add_header 'Access-Control-Allow-Headers' 'X-Api-Key, User-Agent, Content-Type' always;
+  add_header 'Access-Control-Max-Age' 1728000;
+  add_header 'Content-Type' 'text/plain charset=UTF-8';
+  add_header 'Content-Length' 0;
+  return 204;
+}
+```
+
+> [!WARNING]
+> For security reasons, it's best to specify a list of URLs in Access-Control-Allow-Origin rather than using `*`.
+
+Configuration example for Caddy (tested on my server):
+
+```caddy
+:80, immich.mydomain.com {
+
+    reverse_proxy 127.0.0.1:8088
+
+    @allowedOrigin {
+        header Origin http://localhost:5173
+        header Origin https://tdpi95.github.io
+    }
+
+    header @allowedOrigin {
+        Access-Control-Allow-Origin "{http.request.header.Origin}"
+        Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        Access-Control-Allow-Headers "Authorization, Content-Type, Accept"
+        Access-Control-Allow-Credentials true
+    }
+
+    @options method OPTIONS
+    handle @options {
+        header Access-Control-Allow-Origin "{header.Origin}"
+        header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+        header Access-Control-Allow-Headers "Accept, Authorization, Content-Type, x-api-key"
+        header Access-Control-Allow-Credentials "true"
+        header Access-Control-Max-Age "3600"
+        respond "" 204
+    }
+}
+```

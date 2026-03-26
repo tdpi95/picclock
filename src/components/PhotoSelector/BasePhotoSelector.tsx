@@ -119,11 +119,11 @@ export function BasePhotoSelector({
                 }
             >
                 <TabsList className="w-full bg-white/30">
-                    <TabsTrigger value="photos">
-                        Photos ({selectedPhotos.length})
-                    </TabsTrigger>
                     <TabsTrigger value="albums">
                         Albums ({selectedAlbums.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="photos">
+                        Photos ({selectedPhotos.length})
                     </TabsTrigger>
                 </TabsList>
 

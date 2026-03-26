@@ -1,6 +1,6 @@
 import { useSettings } from "@/context/SettingsContext";
 import { loadGoogleFont } from "@/lib/utils";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
     moving?: boolean;
@@ -11,7 +11,7 @@ const PANEL_WIDTH = 260;
 const PANEL_HEIGHT = 120;
 
 export default function FloatingClock({ moving = true }: Props) {
-    const { clockSettings } = useSettings();
+    const { clockSettings, updateClockSettings } = useSettings();
     const containerRef = useRef<HTMLDivElement>(null);
 
     const hourRef = useRef<HTMLSpanElement>(null);
@@ -24,6 +24,20 @@ export default function FloatingClock({ moving = true }: Props) {
     const position = useRef({ x: 100, y: 100 });
     const lastTime = useRef(0);
 
+    const [isDragging, setIsDragging] = useState(false);
+    const [shaking, setShaking] = useState(false);
+    const dragOffset = useRef({ x: 0, y: 0 });
+
+    // ---------- shaking ----------
+    useEffect(() => {
+        const handleShake = () => {
+            setShaking(true);
+            setTimeout(() => setShaking(false), 500);
+        };
+        window.addEventListener("clock-shake", handleShake);
+        return () => window.removeEventListener("clock-shake", handleShake);
+    }, []);
+
     // ---------- helpers ----------
     const normalizeVelocity = () => {
         const mag = Math.sqrt(
@@ -35,8 +49,8 @@ export default function FloatingClock({ moving = true }: Props) {
 
     const getRandomPosition = () => {
         const padding = 20;
-        const maxX = window.innerWidth - PANEL_WIDTH - padding;
-        const maxY = window.innerHeight - PANEL_HEIGHT - padding;
+        const maxX = window.innerWidth - (containerRef.current?.offsetWidth || PANEL_WIDTH) - padding;
+        const maxY = window.innerHeight - (containerRef.current?.offsetHeight || PANEL_HEIGHT) - padding;
 
         return {
             x: Math.random() * maxX + padding,
@@ -45,7 +59,7 @@ export default function FloatingClock({ moving = true }: Props) {
     };
 
     const applyTransform = (x: number, y: number) => {
-        if (containerRef.current) {
+        if (containerRef.current && !isDragging) {
             containerRef.current.style.transform = `translate(${x}px, ${y}px)`;
         }
     };
@@ -88,23 +102,63 @@ export default function FloatingClock({ moving = true }: Props) {
         return Math.sqrt(dx * dx + dy * dy);
     };
 
+    // ---------- dragging ----------
+    const onMouseDown = (e: React.MouseEvent) => {
+        if (clockSettings.movement !== "static") return;
+        if (!containerRef.current) return;
+
+        const rect = containerRef.current.getBoundingClientRect();
+        dragOffset.current = {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+        };
+        setIsDragging(true);
+    };
+
+    useEffect(() => {
+        if (!isDragging) return;
+
+        const onMouseMove = (e: MouseEvent) => {
+            if (!containerRef.current) return;
+            
+            const x = e.clientX - dragOffset.current.x;
+            const y = e.clientY - dragOffset.current.y;
+            
+            containerRef.current.style.transform = `translate(${x}px, ${y}px)`;
+        };
+
+        const onMouseUp = (e: MouseEvent) => {
+            setIsDragging(false);
+            
+            // Calculate pixel position
+            const x = e.clientX - dragOffset.current.x;
+            const y = e.clientY - dragOffset.current.y;
+            
+            updateClockSettings({
+                position: { x, y }
+            });
+        };
+
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("mouseup", onMouseUp);
+
+        return () => {
+            window.removeEventListener("mousemove", onMouseMove);
+            window.removeEventListener("mouseup", onMouseUp);
+        };
+    }, [isDragging, updateClockSettings]);
+
     // ---------- movement ----------
     useEffect(() => {
         updateTime();
         const timer = setInterval(updateTime, 1000);
 
-        if (!moving) {
+        if (!moving || isDragging) {
             return () => clearInterval(timer);
         }
 
-        let panelWidth = PANEL_WIDTH;
-        if (containerRef.current) {
-            panelWidth = containerRef.current.offsetWidth;
-        }
-        let panelHeight = PANEL_HEIGHT;
-        if (containerRef.current) {
-            panelHeight = containerRef.current.offsetHeight;
-        }
+        let panelWidth = containerRef.current?.offsetWidth || PANEL_WIDTH;
+        let panelHeight = containerRef.current?.offsetHeight || PANEL_HEIGHT;
 
         let rafId: number;
         let intervalId: number | undefined;
@@ -113,10 +167,7 @@ export default function FloatingClock({ moving = true }: Props) {
 
         // STATIC
         if (movement === "static") {
-            // applyTransform(position.current.x, position.current.y);
-            const x = window.innerWidth * clockSettings.position.x / 100 - panelWidth / 2;
-            const y = window.innerHeight * clockSettings.position.y / 100 - panelHeight / 2;
-            applyTransform(x, y);
+            applyTransform(clockSettings.position.x, clockSettings.position.y);
         }
 
         // INTERVAL JUMP
@@ -164,8 +215,8 @@ export default function FloatingClock({ moving = true }: Props) {
                 x += velocity.current.vx * dt;
                 y += velocity.current.vy * dt;
 
-                const maxX = window.innerWidth - panelWidth;
-                const maxY = window.innerHeight - panelHeight;
+                const maxX = window.innerWidth - (containerRef.current?.offsetWidth || panelWidth);
+                const maxY = window.innerHeight - (containerRef.current?.offsetHeight || panelHeight);
 
                 if (x <= 0 || x >= maxX) {
                     velocity.current.vx *= -1;
@@ -191,7 +242,7 @@ export default function FloatingClock({ moving = true }: Props) {
             if (intervalId) clearInterval(intervalId);
             if (rafId) cancelAnimationFrame(rafId);
         };
-    }, [clockSettings, moving]);
+    }, [clockSettings, moving, isDragging]);
 
     useEffect(() => {
         loadGoogleFont(clockSettings.font);
@@ -200,9 +251,35 @@ export default function FloatingClock({ moving = true }: Props) {
     const textSize = 20 * Math.pow(1.15, clockSettings.fontSize - 1);
 
     return (
-        <div ref={containerRef} className="fixed">
+        <div 
+            ref={containerRef} 
+            className="fixed select-none"
+            onMouseDown={onMouseDown}
+            style={{
+                cursor: clockSettings.movement === "static" ? (isDragging ? "grabbing" : "grab") : "default",
+                zIndex: isDragging ? 100 : 10
+            }}
+        >
+            <style>{`
+                @keyframes shake {
+                    0% { transform: translate(1px, 1px) rotate(0deg); }
+                    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+                    20% { transform: translate(-3px, 0px) rotate(1deg); }
+                    30% { transform: translate(3px, 2px) rotate(0deg); }
+                    40% { transform: translate(1px, -1px) rotate(1deg); }
+                    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+                    60% { transform: translate(-3px, 1px) rotate(0deg); }
+                    70% { transform: translate(3px, 1px) rotate(-1deg); }
+                    80% { transform: translate(-1px, -1px) rotate(1deg); }
+                    90% { transform: translate(1px, 2px) rotate(0deg); }
+                    100% { transform: translate(1px, -2px) rotate(-1deg); }
+                }
+                .animate-shake {
+                    animation: shake 0.5s;
+                }
+            `}</style>
             <div
-                className={`backdrop-blur-md bg-white/10 border border-white/20 shadow-lg rounded-2xl px-8 pt-3 pb-6 text-center text-white  flex flex-col justify-center`}
+                className={`backdrop-blur-md bg-white/10 border border-white/20 shadow-lg rounded-2xl px-8 pt-3 pb-6 text-center text-white  flex flex-col justify-center transition-transform ${isDragging ? "scale-105" : "scale-100"} ${shaking ? "animate-shake" : ""}`}
             >
                 {/* Time */}
                 <div
