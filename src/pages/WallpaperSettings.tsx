@@ -14,6 +14,7 @@ import { SiGooglephotos, SiImmich } from "react-icons/si";
 import { useImageStore } from "@/hooks/useImageStore";
 import { GoogleDownloadedPhotosSelector } from "@/components/PhotoSelector/GoogleDownloadedPhotosSelector";
 import { ImmichSettingsDialog } from "@/components/ImmichSettingsDialog";
+import { toast } from "sonner";
 
 type PanelType =
     | "main"
@@ -22,11 +23,11 @@ type PanelType =
     | "googleDownloadedPhotos";
 
 const WallpaperSettings: React.FC = () => {
-    const { 
-        wallpaperSettings, 
+    const {
+        wallpaperSettings,
         updateWallpaperSettings,
         immichSettings,
-        updateImmichSettings
+        updateImmichSettings,
     } = useSettings();
     const [showedPanel, setShowedPanel] = useState<PanelType>("main");
     const [isImmichSettingsOpen, setIsImmichSettingsOpen] = useState(false);
@@ -262,7 +263,9 @@ const WallpaperSettings: React.FC = () => {
         } else {
             const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
             if (!clientId) {
-                alert("VITE_GOOGLE_CLIENT_ID is not set in .env");
+                toast.error("Google client ID is not set.", {
+                    duration: 3000,
+                });
                 return;
             }
 

@@ -25,17 +25,17 @@ export default function FloatingClock({ moving = true }: Props) {
     const lastTime = useRef(0);
 
     const [isDragging, setIsDragging] = useState(false);
-    const [shaking, setShaking] = useState(false);
+    const [wobbling, setWobbling] = useState(false);
     const dragOffset = useRef({ x: 0, y: 0 });
 
-    // ---------- shaking ----------
+    // ---------- wobbling ----------
     useEffect(() => {
-        const handleShake = () => {
-            setShaking(true);
-            setTimeout(() => setShaking(false), 500);
+        const handleWobble = () => {
+            setWobbling(true);
+            setTimeout(() => setWobbling(false), 500);
         };
-        window.addEventListener("clock-shake", handleShake);
-        return () => window.removeEventListener("clock-shake", handleShake);
+        window.addEventListener("clock-wobble", handleWobble);
+        return () => window.removeEventListener("clock-wobble", handleWobble);
     }, []);
 
     // ---------- helpers ----------
@@ -49,8 +49,14 @@ export default function FloatingClock({ moving = true }: Props) {
 
     const getRandomPosition = () => {
         const padding = 20;
-        const maxX = window.innerWidth - (containerRef.current?.offsetWidth || PANEL_WIDTH) - padding;
-        const maxY = window.innerHeight - (containerRef.current?.offsetHeight || PANEL_HEIGHT) - padding;
+        const maxX =
+            window.innerWidth -
+            (containerRef.current?.offsetWidth || PANEL_WIDTH) -
+            padding;
+        const maxY =
+            window.innerHeight -
+            (containerRef.current?.offsetHeight || PANEL_HEIGHT) -
+            padding;
 
         return {
             x: Math.random() * maxX + padding,
@@ -103,7 +109,7 @@ export default function FloatingClock({ moving = true }: Props) {
     };
 
     // ---------- dragging ----------
-    const onMouseDown = (e: React.MouseEvent) => {
+    const onPointerDown = (e: React.PointerEvent) => {
         if (clockSettings.movement !== "static") return;
         if (!containerRef.current) return;
 
@@ -118,33 +124,32 @@ export default function FloatingClock({ moving = true }: Props) {
     useEffect(() => {
         if (!isDragging) return;
 
-        const onMouseMove = (e: MouseEvent) => {
+        const onPointerMove = (e: PointerEvent) => {
             if (!containerRef.current) return;
-            
+
             const x = e.clientX - dragOffset.current.x;
             const y = e.clientY - dragOffset.current.y;
-            
+
             containerRef.current.style.transform = `translate(${x}px, ${y}px)`;
         };
 
-        const onMouseUp = (e: MouseEvent) => {
+        const onPointerUp = (e: PointerEvent) => {
             setIsDragging(false);
-            
-            // Calculate pixel position
+
             const x = e.clientX - dragOffset.current.x;
             const y = e.clientY - dragOffset.current.y;
-            
+
             updateClockSettings({
-                position: { x, y }
+                position: { x, y },
             });
         };
 
-        window.addEventListener("mousemove", onMouseMove);
-        window.addEventListener("mouseup", onMouseUp);
+        window.addEventListener("pointermove", onPointerMove);
+        window.addEventListener("pointerup", onPointerUp);
 
         return () => {
-            window.removeEventListener("mousemove", onMouseMove);
-            window.removeEventListener("mouseup", onMouseUp);
+            window.removeEventListener("pointermove", onPointerMove);
+            window.removeEventListener("pointerup", onPointerUp);
         };
     }, [isDragging, updateClockSettings]);
 
@@ -215,8 +220,12 @@ export default function FloatingClock({ moving = true }: Props) {
                 x += velocity.current.vx * dt;
                 y += velocity.current.vy * dt;
 
-                const maxX = window.innerWidth - (containerRef.current?.offsetWidth || panelWidth);
-                const maxY = window.innerHeight - (containerRef.current?.offsetHeight || panelHeight);
+                const maxX =
+                    window.innerWidth -
+                    (containerRef.current?.offsetWidth || panelWidth);
+                const maxY =
+                    window.innerHeight -
+                    (containerRef.current?.offsetHeight || panelHeight);
 
                 if (x <= 0 || x >= maxX) {
                     velocity.current.vx *= -1;
@@ -248,42 +257,56 @@ export default function FloatingClock({ moving = true }: Props) {
         loadGoogleFont(clockSettings.font);
     }, [clockSettings.font]);
 
-    const textSize = 20 * Math.pow(1.15, clockSettings.fontSize - 1);
+    const textSize = Math.round(
+        20 * Math.pow(1.15, clockSettings.fontSize - 1),
+    );
+
+    const paddingX = textSize / 2;
+    const paddingTop = textSize / 4;
+    const paddingBottom = textSize / 2;
 
     return (
-        <div 
-            ref={containerRef} 
+        <div
+            ref={containerRef}
             className="fixed select-none"
-            onMouseDown={onMouseDown}
+            onPointerDown={onPointerDown}
             style={{
-                cursor: clockSettings.movement === "static" ? (isDragging ? "grabbing" : "grab") : "default",
-                zIndex: isDragging ? 100 : 10
+                cursor:
+                    clockSettings.movement === "static"
+                        ? isDragging
+                            ? "grabbing"
+                            : "grab"
+                        : "default",
+                zIndex: isDragging ? 100 : 10,
+                touchAction: "none",
             }}
         >
             <style>{`
-                @keyframes shake {
-                    0% { transform: translate(1px, 1px) rotate(0deg); }
-                    10% { transform: translate(-1px, -2px) rotate(-1deg); }
-                    20% { transform: translate(-3px, 0px) rotate(1deg); }
-                    30% { transform: translate(3px, 2px) rotate(0deg); }
-                    40% { transform: translate(1px, -1px) rotate(1deg); }
-                    50% { transform: translate(-1px, 2px) rotate(-1deg); }
-                    60% { transform: translate(-3px, 1px) rotate(0deg); }
-                    70% { transform: translate(3px, 1px) rotate(-1deg); }
-                    80% { transform: translate(-1px, -1px) rotate(1deg); }
-                    90% { transform: translate(1px, 2px) rotate(0deg); }
-                    100% { transform: translate(1px, -2px) rotate(-1deg); }
+                @keyframes wobble {
+                    0% { transform: translateX(0); }
+                    15% { transform: translateX(-2px) rotate(-1deg); }
+                    30% { transform: translateX(2px) rotate(1deg); }
+                    45% { transform: translateX(-2px) rotate(-1deg); }
+                    60% { transform: translateX(2px) rotate(1deg); }
+                    75% { transform: translateX(-1px) rotate(-0.5deg); }
+                    100% { transform: translateX(0); }
                 }
-                .animate-shake {
-                    animation: shake 0.5s;
+                .animate-wobble {
+                    animation: wobble 0.5s ease-in-out;
                 }
             `}</style>
             <div
-                className={`backdrop-blur-md bg-white/10 border border-white/20 shadow-lg rounded-2xl px-8 pt-3 pb-6 text-center text-white  flex flex-col justify-center transition-transform ${isDragging ? "scale-105" : "scale-100"} ${shaking ? "animate-shake" : ""}`}
+                className={`${clockSettings.bgBlur ? "backdrop-blur-md bg-white/10 border border-white/20" : "bg-black/10"} shadow-lg rounded-2xl text-center text-white flex flex-col justify-center transition-transform ${isDragging ? "scale-105" : "scale-100"} ${wobbling ? "animate-wobble" : ""}`}
+                style={{
+                    paddingLeft: `${paddingX}px`,
+                    paddingRight: `${paddingX}px`,
+                    paddingTop: `${paddingTop}px`,
+                    paddingBottom: `${paddingBottom}px`,
+                }}
             >
                 {/* Time */}
                 <div
-                    className="flex items-baseline justify-center gap-1 drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]"
+                    className={`flex items-baseline justify-center gap-1 ${clockSettings.bgBlur ? "drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]" : "drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]"}`}
                     style={{
                         fontFamily: `'${clockSettings.font}', sans-serif`,
                         fontVariantNumeric: "tabular-nums",
@@ -292,24 +315,20 @@ export default function FloatingClock({ moving = true }: Props) {
                     <span
                         ref={hourRef}
                         className="font-semibold inline-block text-right"
-                        style={{ 
+                        style={{
                             fontSize: `${textSize}px`,
-                            minWidth: "1em"
+                            minWidth: "1em",
                         }}
                     >
                         00
                     </span>
-                    <span
-                        style={{ fontSize: `${textSize}px` }}
-                    >
-                        :
-                    </span>
+                    <span style={{ fontSize: `${textSize}px` }}>:</span>
                     <span
                         ref={minuteRef}
                         className="inline-block text-left"
-                        style={{ 
+                        style={{
                             fontSize: `${textSize}px`,
-                            minWidth: "1em"
+                            minWidth: "1em",
                         }}
                     >
                         00
@@ -320,7 +339,7 @@ export default function FloatingClock({ moving = true }: Props) {
                                 ref={ampmRef}
                                 className="absolute bottom-[100%] left-0 opacity-70 leading-none"
                                 style={{
-                                    fontSize: `${textSize * 0.3}px`
+                                    fontSize: `${textSize * 0.3}px`,
                                 }}
                             >
                                 AM
@@ -332,7 +351,7 @@ export default function FloatingClock({ moving = true }: Props) {
                             className="inline-block"
                             style={{
                                 fontSize: `${textSize * 0.3}px`,
-                                minWidth: "2ch"
+                                minWidth: "2ch",
                             }}
                         >
                             00

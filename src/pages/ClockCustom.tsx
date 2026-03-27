@@ -18,6 +18,7 @@ import {
 } from "@/context/SettingsContext";
 import { loadGoogleFont } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const fonts = [
     "Inter",
@@ -51,6 +52,9 @@ const ClockCustom = () => {
     const update24h = (twentyFourHour: boolean) => {
         updateClockSettings({ ...clockSettings, _24h: twentyFourHour });
     };
+    const updateBgBlur = (bgBlur: boolean) => {
+        updateClockSettings({ ...clockSettings, bgBlur });
+    };
 
     const handleSelectorOpen = () => {
         fonts.forEach(loadGoogleFont);
@@ -62,6 +66,13 @@ const ClockCustom = () => {
 
     const updatePosition = (position: Position) => {
         updateClockSettings({ ...clockSettings, position });
+    };
+
+    const resetClockPosition = () => {
+        toast("Clock position reset.", {
+            duration: 3000,
+        });
+        updateClockSettings({ ...clockSettings, position: { x: 100, y: 100 } });
     };
 
     return (
@@ -82,6 +93,15 @@ const ClockCustom = () => {
                         <Switch
                             checked={clockSettings._24h}
                             onCheckedChange={update24h}
+                        />
+                    </Field>
+                </FieldLabel>
+                <FieldLabel>
+                    <Field orientation={"horizontal"}>
+                        <FieldTitle>Background Blur</FieldTitle>
+                        <Switch
+                            checked={clockSettings.bgBlur}
+                            onCheckedChange={updateBgBlur}
                         />
                     </Field>
                 </FieldLabel>
@@ -143,18 +163,24 @@ const ClockCustom = () => {
                             <label htmlFor="static">Static</label>
                         </div>
                     </RadioGroup>
+                    <div className="mt-2 space-y-2">
+                        {clockSettings.movement === "static" && (
+                            <>
+                                <p className="text-xs italic">
+                                    Tip: Drag the clock to reposition it when in
+                                    Static mode.
+                                </p>
+                                <Button
+                                    variant="outline-ghost"
+                                    size="sm"
+                                    onClick={resetClockPosition}
+                                >
+                                    Reset Position
+                                </Button>
+                            </>
+                        )}
+                    </div>
                 </FormField>
-
-                {clockSettings.movement == "static" && (
-                    <FormField label="Position" orientation="horizontal">
-                        <Button
-                            variant="outline-ghost"
-                            onClick={() => setShowedPanel("positionSelector")}
-                        >
-                            Position
-                        </Button>
-                    </FormField>
-                )}
             </FieldGroup>
 
             <FontSelector
