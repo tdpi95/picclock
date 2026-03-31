@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef, useCallback, useMemo } from "react";
+import { useState, useEffect, forwardRef, useCallback, useMemo, useImperativeHandle, useRef } from "react";
 import { useSettings } from "@/context/SettingsContext";
 import { useImageStore } from "@/hooks/useImageStore";
 import { createProvider } from "@/lib/providers";
@@ -7,7 +7,15 @@ interface WallpaperProps {
     onLoad?: () => void;
 }
 
-const Wallpaper = forwardRef<HTMLDivElement, WallpaperProps>(({ onLoad }, ref) => {
+interface WallpaperProps {
+    onLoad?: () => void;
+}
+
+export interface WallpaperHandle extends HTMLDivElement {
+    downloadImage: () => void;
+}
+
+const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) => {
     const { 
         wallpaperSettings, 
         updateWallpaperSettings, 
@@ -109,9 +117,54 @@ const Wallpaper = forwardRef<HTMLDivElement, WallpaperProps>(({ onLoad }, ref) =
         }
     };
 
+    const divRef = useRef<HTMLDivElement>(null);
+
+    useImperativeHandle(ref, () => {
+        const div = divRef.current;
+        if (!div) return {} as any;
+
+        return Object.assign(div, {
+            downloadImage: async () => {
+                const img = div.querySelector('img[data-active="true"]') as HTMLImageElement;
+                if (!img || !img.src) {
+                    console.error("No current image found to download");
+                    return;
+                }
+
+                try {
+                    const response = await fetch(img.src);
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    
+                    const link = document.createElement("a");
+                    const timestamp = new Date().getTime();
+                    link.download = `wallpaper-${timestamp}.jpg`;
+                    link.href = url;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    URL.revokeObjectURL(url);
+                } catch (err) {
+                    console.error("Failed to download image via fetch (likely CORS):", err);
+                    // fallback
+                    const link = document.createElement("a");
+                    link.href = img.src;
+                    const timestamp = new Date().getTime();
+                    link.download = `wallpaper-${timestamp}.jpg`;
+                    link.target = "_blank";
+                    link.rel = "noopener noreferrer";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            }
+        }) as any;
+    }, []);
+
     return (
         <div 
-            ref={ref} 
+            ref={divRef}
             className="absolute inset-0 overflow-hidden"
             onClick={handleInteraction}
         >
@@ -119,6 +172,7 @@ const Wallpaper = forwardRef<HTMLDivElement, WallpaperProps>(({ onLoad }, ref) =
                 <img
                     key={`prev-${prevImage}`}
                     src={prevImage}
+                    crossOrigin="anonymous"
                     className={`absolute inset-0 h-full w-full object-cover pointer-events-none ${isTransitioning ? getOutAnimation() : "hidden"}`}
                     alt=""
                 />
@@ -127,6 +181,8 @@ const Wallpaper = forwardRef<HTMLDivElement, WallpaperProps>(({ onLoad }, ref) =
                 <img
                     key={`curr-${currentImage}`}
                     src={currentImage}
+                    data-active="true"
+                    crossOrigin="anonymous"
                     className={`absolute inset-0 h-full w-full object-cover ${isTransitioning ? getInAnimation() : ""}`}
                     alt=""
                 />

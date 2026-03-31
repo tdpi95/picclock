@@ -1,20 +1,20 @@
 import { useSettings } from "@/context/SettingsContext";
 import { useEffect, useRef, useState } from "react";
-import { LuFullscreen, LuSettings } from "react-icons/lu";
+import { LuFullscreen, LuSettings, LuDownload } from "react-icons/lu";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { Toaster } from "@/components/ui/sonner";
 import FloatingClock from "@/components/FloatingClock";
 import MainSettings from "./MainSettings";
-import Wallpaper from "@/components/Wallpaper";
+import Wallpaper, { type WallpaperHandle } from "@/components/Wallpaper";
 
 function Home() {
     const { wallpaperSettings, clockSettings, isInitialized } = useSettings();
     const [showSettings, setShowSettings] = useState(false);
     const { changeDuration: changeWakeLockDuration } = useWakeLock(-1);
 
-    const imgRef = useRef<HTMLDivElement | null>(null);
+    const imgRef = useRef<WallpaperHandle | null>(null);
 
     useEffect(() => {
         if (isInitialized) {
@@ -55,6 +55,10 @@ function Home() {
         }
     };
 
+    const handleDownload = () => {
+        imgRef.current?.downloadImage();
+    };
+
     return (
         <div 
             className="relative min-h-screen w-full bg-linear-to-r from-blue-500 to-teal-800"
@@ -71,7 +75,17 @@ function Home() {
             <Toaster position="top-right" />
 
             <Footer
-                triggerElementRef={imgRef}
+                triggerElementRef={imgRef as any}
+                leftElement={
+                    <Button
+                        size="lg"
+                        variant="ghost"
+                        onClick={handleDownload}
+                        title="Download Wallpaper"
+                    >
+                        <LuDownload size={30} />
+                    </Button>
+                }
                 rightElement={
                     <div className="flex gap-2">
                         <Button

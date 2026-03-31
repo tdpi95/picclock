@@ -1,7 +1,7 @@
 import type { ImageProvider } from "./types";
 import type { ProviderContext } from "./index";
 
-const proxy = "https://whateverorigin.org/get?url=";
+const proxy = "https://api.codetabs.com/v1/proxy?quest=";
 const bingUrl = encodeURIComponent(
     "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US",
 );
@@ -33,8 +33,7 @@ export class BingProvider implements ImageProvider {
             console.log("Fetching new Bing image from: ", bUrl);
             const response = await fetch(bUrl);
             const data = await response.json();
-            const contents = JSON.parse(data.contents);
-            const image = contents.images[0];
+            const image = data.images[0];
             const imageUrl = `https://www.bing.com${image.url}`;
             
             updateWallpaperSettings({
