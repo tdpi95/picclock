@@ -90,14 +90,12 @@ const WallpaperSettings: React.FC = () => {
 
                 setDownloadProgress((p) => ({ ...p, current: i + 1 }));
 
-                // Skip if already exists
                 const alreadyExists = await googlePhotoStore.exists(item.id);
                 if (alreadyExists) {
                     continue;
                 }
 
                 try {
-                    // Fetch the image as a blob
                     const downloadUrl = `${baseUrl}=w2048-h2048`;
                     const imgRes = await fetch(downloadUrl, {
                         headers: { Authorization: `Bearer ${accessToken}` },
@@ -120,7 +118,6 @@ const WallpaperSettings: React.FC = () => {
                         continue;
                     }
 
-                    // Save (upsert) in IndexedDB
                     await googlePhotoStore.save(item.id, blob);
                 } catch (err) {
                     console.error(`Error processing item ${item.id}:`, err);
@@ -132,8 +129,9 @@ const WallpaperSettings: React.FC = () => {
         } finally {
             setDownloading(false);
             setDownloadProgress({ current: 0, total: 0 });
-            // Trigger a refresh/re-render to ensure provider picks up new photos
-            updateWallpaperSettings({ ...wallpaperSettings });
+            
+            // trigger a refresh to ensure provider picks up new photos
+            window.dispatchEvent(new CustomEvent("wallpaper-refresh"));
         }
     };
 

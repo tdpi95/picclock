@@ -12,13 +12,7 @@ export type VideoRecord = {
 
 export class VideoStore extends BaseIndexedDB<VideoRecord> {
     constructor() {
-        super("media-db", "videos", 1);
-    }
-
-    protected onUpgrade(db: IDBDatabase) {
-        if (!db.objectStoreNames.contains("videos")) {
-            db.createObjectStore("videos", { keyPath: "id" });
-        }
+        super("media-db", ["photos", "google-photos", "local", "videos"], 4);
     }
 
     async create(id: string, file: File): Promise<void> {

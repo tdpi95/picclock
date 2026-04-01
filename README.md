@@ -5,17 +5,23 @@ PicClock is a React web app that turns any PC, tablet, or phone into a digital p
 You can use the pre-built version immediately at:
 https://tdpi95.github.io/picclock/
 
+<p align="center">
+  <img src="screenshots/screenshot_1.png" width="32%" alt="screenshot1" />
+  <img src="screenshots/screenshot_2.png" width="32%" alt="screenshot2" />
+  <img src="screenshots/screenshot_3.png" width="32%" alt="screenshot3" />
+</p>
+
 ---
 
 ## Features
 
 - Display photos from:
-    - Bing Image of the Day
-    - Picsum (random images)
-    - Local files on your device
+  - Bing Image of the Day
+  - Picsum (random images)
+  - Local files on your device
 - Digital clock overlay
-    - Static position
-    - Moving around the screen (DVD-style)
+  - Static position
+  - Moving around the screen (DVD-style)
 - Fullscreen mode for dedicated displays
 
 ---
@@ -25,9 +31,9 @@ https://tdpi95.github.io/picclock/
 - Weather display
 - More customization (font, color, size...)
 - More image sources:
-    - Immich
-    - Google Photos
-    - Unsplash
+  - Immich
+  - Google Photos
+  - Unsplash
 
 ---
 
@@ -62,17 +68,17 @@ Create `launch.json` in `.vscode`:
 
 ```json
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "chrome",
-            "request": "launch",
-            "name": "Launch Chrome against localhost",
-            "url": "http://localhost:5173/picclock/",
-            "webRoot": "${workspaceFolder}",
-            "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:5173/picclock/",
+      "webRoot": "${workspaceFolder}",
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-debug-profile"
+    }
+  ]
 }
 ```
 

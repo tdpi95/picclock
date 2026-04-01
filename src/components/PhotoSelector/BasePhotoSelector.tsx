@@ -143,7 +143,7 @@ export function BasePhotoSelector({
                                 value="photos"
                                 className="mt-0 outline-none"
                             >
-                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
                                     {photos.map((photo) => (
                                         <div
                                             key={photo.id}
@@ -193,7 +193,7 @@ export function BasePhotoSelector({
                                 value="albums"
                                 className="mt-0 outline-none"
                             >
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                                     {albums.map((album) => (
                                         <div
                                             key={album.id}

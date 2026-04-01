@@ -70,6 +70,12 @@ const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) 
     }, [provider, isInitialized, handleNext]);
 
     useEffect(() => {
+        const refresh = () => handleNext();
+        window.addEventListener("wallpaper-refresh", refresh);
+        return () => window.removeEventListener("wallpaper-refresh", refresh);
+    }, [handleNext]);
+
+    useEffect(() => {
         if (!isInitialized) return;
 
         let refreshMillis = 0;

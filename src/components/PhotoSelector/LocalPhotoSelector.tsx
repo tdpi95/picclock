@@ -34,6 +34,7 @@ export default function LocalPhotoSelector({ onClose }: PhotoSelectorProps) {
 
     const [mode, setMode] = useState<AddMode>(wallpaperSettings.uploadMode);
     const [showUrlForm, setShowUrlForm] = useState(false);
+    const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -77,16 +78,18 @@ export default function LocalPhotoSelector({ onClose }: PhotoSelectorProps) {
         const remaining = MAX_IMAGES - photos.length;
         const selected = blobs.slice(0, remaining);
 
-        for (const blob of selected) {
+        const promises = selected.map(async (blob) => {
             const id = generateUUID();
-            photoStore.create(id, blob).then(() => {
-                photoStore.getThumbnailURL(id).then((thumbUrl) => {
-                    if (thumbUrl) {
-                        setPhotos((prev) => [...prev, { id, thumbUrl }]);
-                    }
-                });
-            });
-        }
+            await photoStore.create(id, blob);
+            const thumbUrl = await photoStore.getThumbnailURL(id);
+            if (thumbUrl) {
+                setPhotos((prev) => [...prev, { id, thumbUrl }]);
+            }
+        });
+
+        Promise.all(promises).then(() => {
+            window.dispatchEvent(new CustomEvent("wallpaper-refresh"));
+        });
     };
 
     const addUrls = (urls: string[]) => {
@@ -140,12 +143,16 @@ export default function LocalPhotoSelector({ onClose }: PhotoSelectorProps) {
                     </Button>
                 }
             >
-                <div className="px-6 py-2">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="px-6 py-2" onClick={() => setSelectedPhotoId(null)}>
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {photos.map((photo, index) => (
                             <div
                                 key={photo.id}
-                                className="relative aspect-square overflow-hidden rounded-xl shadow border border-white"
+                                className="relative aspect-square overflow-hidden rounded-xl shadow border border-white cursor-pointer group"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedPhotoId(selectedPhotoId === photo.id ? null : photo.id);
+                                }}
                             >
                                 <img
                                     src={photo.thumbUrl}
@@ -153,9 +160,10 @@ export default function LocalPhotoSelector({ onClose }: PhotoSelectorProps) {
                                     className="h-full w-full object-cover"
                                 />
 
-                                <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                <div className={`absolute inset-0 bg-black/40 ${selectedPhotoId === photo.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity flex items-center justify-center gap-3`}>
                                     <button
-                                        onClick={async () => {
+                                        onClick={async (e) => {
+                                            e.stopPropagation();
                                             const url =
                                                 await photoStore.getOriginalURL(
                                                     photo.id,
@@ -168,7 +176,10 @@ export default function LocalPhotoSelector({ onClose }: PhotoSelectorProps) {
                                         <FiMaximize2 className="w-4 h-4" />
                                     </button>
                                     <button
-                                        onClick={() => removeImage(photo.id)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            removeImage(photo.id);
+                                        }}
                                         className="p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white transition-colors"
                                         title="Delete"
                                     >

@@ -11,7 +11,7 @@ export type ImageRecord = {
 
 export class ImageStore extends BaseIndexedDB<ImageRecord> {
     constructor(storeName: string) {
-        super("media-db", ["local", "google-photos"], 2); // Ensure all stores are created
+        super("media-db", ["photos", "google-photos", "local", "videos"], 4); // Ensure all stores are created
         this.storeName = storeName; // Use the specific store for this instance
     }
 

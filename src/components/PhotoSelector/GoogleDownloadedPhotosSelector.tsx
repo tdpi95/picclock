@@ -18,6 +18,7 @@ export function GoogleDownloadedPhotosSelector({
         { id: string; thumbnail: string; original: string }[]
     >([]);
     const [loading, setLoading] = useState(false);
+    const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
     const store = useImageStore("google-photos");
 
     const loadPhotos = useCallback(async () => {
@@ -67,50 +68,58 @@ export function GoogleDownloadedPhotosSelector({
                 </Button>
             }
         >
-            <div className="p-6 h-[60vh] overflow-y-auto">
-                {loading ? (
-                    <div className="flex items-center justify-center h-full">
-                        <span className="text-muted-foreground italic">
-                            Loading...
-                        </span>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {photos.map((photo) => (
-                            <div
-                                key={photo.id}
-                                className="relative aspect-square rounded-xl overflow-hidden border border-border group bg-muted"
-                            >
-                                <img
-                                    src={photo.thumbnail}
-                                    className="w-full h-full object-cover"
-                                    alt=""
-                                />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                    <button
-                                        onClick={() =>
-                                            window.open(
-                                                photo.original,
-                                                "_blank",
-                                            )
-                                        }
-                                        className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white transition-colors"
-                                        title="View Original"
-                                    >
-                                        <FiMaximize2 className="w-4 h-4" />
-                                    </button>
-                                    <button
-                                        onClick={() => deletePhoto(photo.id)}
-                                        className="p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white transition-colors"
-                                        title="Delete"
-                                    >
-                                        <FiTrash2 className="w-4 h-4" />
-                                    </button>
+                <div 
+                    className="p-6 h-[60vh] overflow-y-auto"
+                    onClick={() => setSelectedPhotoId(null)}
+                >
+                    {loading ? (
+                        <div className="flex items-center justify-center h-full">
+                            <span className="text-muted-foreground italic">
+                                Loading...
+                            </span>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {photos.map((photo) => (
+                                <div
+                                    key={photo.id}
+                                    className="relative aspect-square rounded-xl overflow-hidden border border-border group bg-muted cursor-pointer"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedPhotoId(selectedPhotoId === photo.id ? null : photo.id);
+                                    }}
+                                >
+                                    <img
+                                        src={photo.thumbnail}
+                                        className="w-full h-full object-cover"
+                                        alt=""
+                                    />
+                                    <div className={`absolute inset-0 bg-black/40 ${selectedPhotoId === photo.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity flex items-center justify-center gap-3`}>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                window.open(photo.original, "_blank");
+                                            }}
+                                            className="p-2 bg-white/20 hover:bg-white/40 rounded-full text-white transition-colors"
+                                            title="View Original"
+                                        >
+                                            <FiMaximize2 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                deletePhoto(photo.id);
+                                            }}
+                                            className="p-2 bg-red-500/80 hover:bg-red-500 rounded-full text-white transition-colors"
+                                            title="Delete"
+                                        >
+                                            <FiTrash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                            ))}
+                        </div>
+                    )}
                 {photos.length === 0 && !loading && (
                     <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                         <SiGooglephotos className="w-12 h-12 mb-4 opacity-20" />
