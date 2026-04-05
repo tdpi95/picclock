@@ -2,7 +2,9 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <link rel="icon" type="image/svg+xml" href="/picclock/vite.svg" />
+        <link rel="icon" type="image/png" href="/picclock/icon.png" />
+        <link rel="manifest" href="/picclock/manifest.json" />
+        <meta name="theme-color" content="#000000" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>PicClock - Digital Photo Frame</title>
         <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -19,5 +21,19 @@
     </head>
     <body>
         <div id="root"></div>
+        <script>
+            if ("serviceWorker" in navigator) {
+                window.addEventListener("load", () => {
+                    navigator.serviceWorker
+                        .register("/picclock/sw.js")
+                        .then((reg) =>
+                            console.log("Service Worker registered:", reg)
+                        )
+                        .catch((err) =>
+                            console.log("Service Worker registration failed:", err)
+                        );
+                });
+            }
+        </script>
     </body>
 </html>
