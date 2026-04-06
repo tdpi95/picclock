@@ -168,18 +168,46 @@ const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) 
         }) as any;
     }, []);
 
+    const isFit = wallpaperSettings.wallpaperPosition === "fit";
+    const objectClass = isFit ? "object-contain" : "object-cover";
+
     return (
         <div 
             ref={divRef}
-            className="absolute inset-0 overflow-hidden"
+            className="absolute inset-0 overflow-hidden bg-black"
             onClick={handleInteraction}
         >
+            {/* blur layer for fit mode */}
+            {isFit && prevImage && (
+                <div className={`absolute inset-0 pointer-events-none ${isTransitioning ? getOutAnimation() : "hidden"}`}>
+                    <img
+                        key={`prev-blur-${prevImage}`}
+                        src={prevImage}
+                        crossOrigin="anonymous"
+                        className="absolute inset-0 h-full w-full object-cover blur-2xl opacity-50 scale-110"
+                        alt=""
+                    />
+                </div>
+            )}
+            {isFit && currentImage && (
+                <div className={`absolute inset-0 pointer-events-none ${isTransitioning ? getInAnimation() : ""}`}>
+                    <img
+                        key={`curr-blur-${currentImage}`}
+                        src={currentImage}
+                        crossOrigin="anonymous"
+                        className="absolute inset-0 h-full w-full object-cover blur-2xl opacity-50 scale-110"
+                        alt=""
+                    />
+                </div>
+            )}
+
+            {/* main wallpaper layer */}
             {prevImage && (
                 <img
                     key={`prev-${prevImage}`}
                     src={prevImage}
                     crossOrigin="anonymous"
-                    className={`absolute inset-0 h-full w-full object-cover pointer-events-none ${isTransitioning ? getOutAnimation() : "hidden"}`}
+                    className={`absolute inset-0 h-full w-full ${objectClass} pointer-events-none ${isTransitioning ? getOutAnimation() : "hidden"}`}
                     alt=""
                 />
             )}
@@ -189,7 +217,7 @@ const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) 
                     src={currentImage}
                     data-active="true"
                     crossOrigin="anonymous"
-                    className={`absolute inset-0 h-full w-full object-cover ${isTransitioning ? getInAnimation() : ""}`}
+                    className={`absolute inset-0 h-full w-full ${objectClass} ${isTransitioning ? getInAnimation() : ""}`}
                     alt=""
                 />
             )}

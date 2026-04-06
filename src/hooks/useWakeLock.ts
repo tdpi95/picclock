@@ -12,6 +12,7 @@ export const useWakeLock = (initDuration: number) => {
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [duration, setDuration] = useState(initDuration);
     const showedErrorRef = useRef(false);
+    const lastRequestTimeRef = useRef<number>(0);
 
     const requestLock = useCallback(async () => {
         if (wakeLockRef.current !== null && !wakeLockRef.current.released) {
@@ -30,9 +31,9 @@ export const useWakeLock = (initDuration: number) => {
                     setIsActive(false);
                     wakeLockRef.current = null;
                     console.log("Screen wake lock was released");
-                    toast.success("Screen wake lock was released", {
-                        position: "bottom-left",
-                    });
+                    // toast.success("Screen wake lock was released", {
+                    //     position: "bottom-left",
+                    // });
                 });
 
                 wakeLockRef.current = sentinel;
@@ -40,7 +41,11 @@ export const useWakeLock = (initDuration: number) => {
                 const msg =
                     "Screen wake lock is active for " + duration / 1000 + "s";
                 console.log(msg);
-                toast.success(msg, { position: "bottom-left" });
+
+                // toast.success(msg, { position: "bottom-left" });
+
+                lastRequestTimeRef.current = Date.now();
+
             } catch (err: unknown) {
                 if (err instanceof Error) {
                     console.error(`${err.name}, ${err.message}`);
@@ -96,7 +101,7 @@ export const useWakeLock = (initDuration: number) => {
         };
 
         const handleClick = async () => {
-            if (wakeLockRef.current == null || wakeLockRef.current.released) {
+            if (Date.now() - lastRequestTimeRef.current > 30000) {
                 await requestLock();
             }
 

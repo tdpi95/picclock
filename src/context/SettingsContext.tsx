@@ -44,6 +44,7 @@ export interface WallpaperSettings {
     uploadMode: "file" | "url";
     wakeLockDuration: number;
     transitionType: TransitionType;
+    wallpaperPosition: "fill" | "fit";
     bing?: {
         lastFetch: number;
         imgUrl: string;
@@ -73,6 +74,7 @@ const defaultWallpaperSettings: WallpaperSettings = {
     uploadMode: "file",
     wakeLockDuration: -1, // disabled by default
     transitionType: "fade",
+    wallpaperPosition: "fill",
 };
 
 const defaultClockSettings: ClockSettings = {

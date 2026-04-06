@@ -180,6 +180,13 @@ const WallpaperSettings: React.FC = () => {
         });
     };
 
+    const updateWallpaperPosition = (value: "fill" | "fit") => {
+        updateWallpaperSettings({
+            ...wallpaperSettings,
+            wallpaperPosition: value,
+        });
+    };
+
     const handleGooglePhotosClick = async () => {
         const startPickerFlow = async (token: string) => {
             try {
@@ -450,6 +457,22 @@ const WallpaperSettings: React.FC = () => {
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="zoom" id="zoom" />
                             <label htmlFor="zoom">Zoom</label>
+                        </div>
+                    </RadioGroup>
+                </FormField>
+
+                <FormField label="Wallpaper position" orientation="vertical">
+                    <RadioGroup
+                        value={wallpaperSettings.wallpaperPosition}
+                        onValueChange={updateWallpaperPosition}
+                    >
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="fill" id="fill" />
+                            <label htmlFor="fill">Fill</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="fit" id="fit" />
+                            <label htmlFor="fit">Fit</label>
                         </div>
                     </RadioGroup>
                 </FormField>
