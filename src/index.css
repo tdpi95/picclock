@@ -235,5 +235,5 @@
     --animate-slide-out-bottom: slide-out-bottom 1.5s ease-in-out forwards;
     --animate-zoom-out: zoom-out 1.5s ease-out forwards;
     --animate-blur-in: blur-in 2s ease-out forwards;
-    --animate-ken-burns: ken-burns 40s ease-in-out infinite;
+    --animate-ken-burns: ken-burns 60s ease-in-out infinite;
 }
