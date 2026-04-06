@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSettings } from "../context/SettingsContext";
+import { useSettings, type TransitionType } from "../context/SettingsContext";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import LocalPhotoSelector from "../components/PhotoSelector/LocalPhotoSelector";
 import { LuImageDown, LuImageUp } from "react-icons/lu";
@@ -173,7 +173,7 @@ const WallpaperSettings: React.FC = () => {
         updateWallpaperSettings({ ...wallpaperSettings, imageSource: value });
     };
 
-    const updateTransitionType = (value: "fade" | "slide" | "zoom") => {
+    const updateTransitionType = (value: TransitionType) => {
         updateWallpaperSettings({
             ...wallpaperSettings,
             transitionType: value,
@@ -445,18 +445,31 @@ const WallpaperSettings: React.FC = () => {
                     <RadioGroup
                         value={wallpaperSettings.transitionType}
                         onValueChange={updateTransitionType}
+                        className="grid grid-cols-2 gap-2"
                     >
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="fade" id="fade" />
                             <label htmlFor="fade">Fade</label>
                         </div>
                         <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="slide" id="slide" />
-                            <label htmlFor="slide">Slide</label>
+                            <RadioGroupItem value="blur" id="blur" />
+                            <label htmlFor="blur">Blur</label>
                         </div>
                         <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="zoom" id="zoom" />
-                            <label htmlFor="zoom">Zoom</label>
+                            <RadioGroupItem value="slide" id="slide" />
+                            <label htmlFor="slide">Slide (Horizontal)</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="slideVertical" id="slideVertical" />
+                            <label htmlFor="slideVertical">Slide (Vertical)</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="zoomOut" id="zoomOut" />
+                            <label htmlFor="zoomOut">Zoom Out</label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="kenBurns" id="kenBurns" />
+                            <label htmlFor="kenBurns">Ken Burns</label>
                         </div>
                     </RadioGroup>
                 </FormField>

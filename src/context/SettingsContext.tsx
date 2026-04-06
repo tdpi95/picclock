@@ -6,7 +6,13 @@ export interface Position {
 }
 
 export type MovementType = "static" | "interval" | "continuous";
-export type TransitionType = "fade" | "slide" | "zoom";
+export type TransitionType = 
+    | "fade" 
+    | "slide" 
+    | "slideVertical" 
+    | "zoomOut" 
+    | "blur" 
+    | "kenBurns";
 
 export interface ClockSettings {
     visible: boolean;

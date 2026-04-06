@@ -111,7 +111,10 @@ const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) 
     const getInAnimation = () => {
         switch (wallpaperSettings.transitionType) {
             case "slide": return "animate-slide-in-right";
-            case "zoom": return "animate-zoom-in";
+            case "slideVertical": return "animate-slide-in-bottom";
+            case "zoomOut": return "animate-zoom-out";
+            case "blur": return "animate-blur-in";
+            case "kenBurns": return "animate-fade-in";
             default: return "animate-fade-in";
         }
     };
@@ -119,6 +122,7 @@ const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) 
     const getOutAnimation = () => {
         switch (wallpaperSettings.transitionType) {
             case "slide": return "animate-slide-out-left";
+            case "slideVertical": return "animate-slide-out-top";
             default: return "animate-fade-out";
         }
     };
@@ -170,6 +174,7 @@ const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) 
 
     const isFit = wallpaperSettings.wallpaperPosition === "fit";
     const objectClass = isFit ? "object-contain" : "object-cover";
+    const isKenBurns = wallpaperSettings.transitionType === "kenBurns";
 
     return (
         <div 
@@ -195,7 +200,7 @@ const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) 
                         key={`curr-blur-${currentImage}`}
                         src={currentImage}
                         crossOrigin="anonymous"
-                        className="absolute inset-0 h-full w-full object-cover blur-2xl opacity-50 scale-110"
+                        className={`absolute inset-0 h-full w-full object-cover blur-2xl opacity-50 scale-110 ${isKenBurns && !isTransitioning ? "animate-ken-burns" : ""}`}
                         alt=""
                     />
                 </div>
@@ -203,23 +208,27 @@ const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) 
 
             {/* main wallpaper layer */}
             {prevImage && (
-                <img
-                    key={`prev-${prevImage}`}
-                    src={prevImage}
-                    crossOrigin="anonymous"
-                    className={`absolute inset-0 h-full w-full ${objectClass} pointer-events-none ${isTransitioning ? getOutAnimation() : "hidden"}`}
-                    alt=""
-                />
+                <div className={`absolute inset-0 pointer-events-none ${isTransitioning ? getOutAnimation() : "hidden"}`}>
+                    <img
+                        key={`prev-${prevImage}`}
+                        src={prevImage}
+                        crossOrigin="anonymous"
+                        className={`absolute inset-0 h-full w-full ${objectClass}`}
+                        alt=""
+                    />
+                </div>
             )}
             {currentImage && (
-                <img
-                    key={`curr-${currentImage}`}
-                    src={currentImage}
-                    data-active="true"
-                    crossOrigin="anonymous"
-                    className={`absolute inset-0 h-full w-full ${objectClass} ${isTransitioning ? getInAnimation() : ""}`}
-                    alt=""
-                />
+                <div className={`absolute inset-0 pointer-events-none ${isTransitioning ? getInAnimation() : ""}`}>
+                    <img
+                        key={`curr-${currentImage}`}
+                        src={currentImage}
+                        data-active="true"
+                        crossOrigin="anonymous"
+                        className={`absolute inset-0 h-full w-full ${objectClass} ${isKenBurns && !isTransitioning ? "animate-ken-burns" : ""}`}
+                        alt=""
+                    />
+                </div>
             )}
             {loadingImage && (
                 <img
