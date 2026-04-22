@@ -1,10 +1,10 @@
 import type { ImageProvider } from "./types";
 import type { ProviderContext } from "./index";
 
-const proxy = "https://api.codetabs.com/v1/proxy?quest=";
-const bingUrl = encodeURIComponent(
-    "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US",
-);
+// const proxy = "https://api.codetabs.com/v1/proxy?quest=";
+// const bingUrl = encodeURIComponent(
+//     "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US",
+// );
 
 const CACHE_STALE_TIME = 60 * 60 * 1000; // 1 hour
 
@@ -29,7 +29,7 @@ export class BingProvider implements ImageProvider {
         }
 
         try {
-            const bUrl = `${proxy}${bingUrl}`;
+            const bUrl = "https://bing-image-proxy.trandinhphuc95.workers.dev"; //`${proxy}${bingUrl}`;
             console.log("Fetching new Bing image from: ", bUrl);
             const response = await fetch(bUrl);
             const data = await response.json();
