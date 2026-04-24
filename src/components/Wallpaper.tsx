@@ -188,7 +188,6 @@ const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) 
                     <img
                         key={`prev-blur-${prevImage}`}
                         src={prevImage}
-                        crossOrigin="anonymous"
                         className="absolute inset-0 h-full w-full object-cover blur-2xl opacity-50 scale-110"
                         alt=""
                     />
@@ -199,7 +198,6 @@ const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) 
                     <img
                         key={`curr-blur-${currentImage}`}
                         src={currentImage}
-                        crossOrigin="anonymous"
                         className={`absolute inset-0 h-full w-full object-cover blur-2xl opacity-50 scale-110 ${isKenBurns && !isTransitioning ? "animate-ken-burns" : ""}`}
                         alt=""
                     />
@@ -212,7 +210,6 @@ const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) 
                     <img
                         key={`prev-${prevImage}`}
                         src={prevImage}
-                        crossOrigin="anonymous"
                         className={`absolute inset-0 h-full w-full ${objectClass}`}
                         alt=""
                     />
@@ -224,7 +221,6 @@ const Wallpaper = forwardRef<WallpaperHandle, WallpaperProps>(({ onLoad }, ref) 
                         key={`curr-${currentImage}`}
                         src={currentImage}
                         data-active="true"
-                        crossOrigin="anonymous"
                         className={`absolute inset-0 h-full w-full ${objectClass} ${isKenBurns && !isTransitioning ? "animate-ken-burns" : ""}`}
                         alt=""
                     />
