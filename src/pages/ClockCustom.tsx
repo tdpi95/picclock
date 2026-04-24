@@ -19,6 +19,7 @@ import {
 import { loadGoogleFont } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/translations";
 
 const fonts = [
     "Inter",
@@ -33,6 +34,7 @@ const fonts = [
 
 const ClockCustom = () => {
     const { clockSettings, updateClockSettings } = useSettings();
+    const { t } = useTranslation();
     const [showedPanel, setShowedPanel] = useState<
         "none" | "photoSelector" | "positionSelector"
     >("none");
@@ -69,7 +71,7 @@ const ClockCustom = () => {
     };
 
     const resetClockPosition = () => {
-        toast("Clock position reset.", {
+        toast(t("clockPositionReset"), {
             duration: 3000,
         });
         updateClockSettings({ ...clockSettings, position: { x: 100, y: 100 } });
@@ -80,7 +82,7 @@ const ClockCustom = () => {
             <FieldGroup>
                 <FieldLabel>
                     <Field orientation={"horizontal"}>
-                        <FieldTitle>Visible</FieldTitle>
+                        <FieldTitle>{t("visible")}</FieldTitle>
                         <Switch
                             checked={clockSettings.visible}
                             onCheckedChange={updateVisible}
@@ -89,7 +91,7 @@ const ClockCustom = () => {
                 </FieldLabel>
                 <FieldLabel>
                     <Field orientation={"horizontal"}>
-                        <FieldTitle>24 Hour Format</FieldTitle>
+                        <FieldTitle>{t("_24h")}</FieldTitle>
                         <Switch
                             checked={clockSettings._24h}
                             onCheckedChange={update24h}
@@ -98,14 +100,14 @@ const ClockCustom = () => {
                 </FieldLabel>
                 <FieldLabel>
                     <Field orientation={"horizontal"}>
-                        <FieldTitle>Background Blur</FieldTitle>
+                        <FieldTitle>{t("bgBlur")}</FieldTitle>
                         <Switch
                             checked={clockSettings.bgBlur}
                             onCheckedChange={updateBgBlur}
                         />
                     </Field>
                 </FieldLabel>
-                <FormField label="Font" orientation="horizontal">
+                <FormField label={t("font")} orientation="horizontal">
                     <Button
                         variant="outline-ghost"
                         onClick={() => setShowedPanel("photoSelector")}
@@ -119,7 +121,7 @@ const ClockCustom = () => {
                         </p>
                     </Button>
                 </FormField>
-                <FormField label="Size" orientation="horizontal">
+                <FormField label={t("size")} orientation="horizontal">
                     <div className="flex items-center gap-4 w-48">
                         <Slider
                             min={1}
@@ -138,7 +140,7 @@ const ClockCustom = () => {
                         </span>
                     </div>
                 </FormField>
-                <FormField label="Movement" orientation="vertical">
+                <FormField label={t("movement")} orientation="vertical">
                     <RadioGroup
                         value={clockSettings?.movement}
                         onValueChange={(value: MovementType) => {
@@ -151,31 +153,30 @@ const ClockCustom = () => {
                                 id="continuous"
                             />
                             <label htmlFor="continuous">
-                                Continuous (DVD logo bounce)
+                                {t("continuous")}
                             </label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="interval" id="interval" />
-                            <label htmlFor="interval">Interval</label>
+                            <label htmlFor="interval">{t("interval")}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="static" id="static" />
-                            <label htmlFor="static">Static</label>
+                            <label htmlFor="static">{t("static")}</label>
                         </div>
                     </RadioGroup>
                     <div className="mt-2 space-y-2">
                         {clockSettings.movement === "static" && (
                             <>
                                 <p className="text-xs italic">
-                                    Tip: Drag the clock to reposition it when in
-                                    Static mode.
+                                    {t("tipStatic")}
                                 </p>
                                 <Button
                                     variant="outline-ghost"
                                     size="sm"
                                     onClick={resetClockPosition}
                                 >
-                                    Reset Position
+                                    {t("resetPosition")}
                                 </Button>
                             </>
                         )}

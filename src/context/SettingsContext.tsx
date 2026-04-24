@@ -60,6 +60,10 @@ export interface WallpaperSettings {
     googlePhotos?: GooglePhotosSettings;
 }
 
+export interface GeneralSettings {
+    language: "en" | "vi";
+}
+
 interface SettingsContextType {
     wallpaperSettings: WallpaperSettings;
     updateWallpaperSettings: (newSettings: Partial<WallpaperSettings>) => void;
@@ -67,6 +71,8 @@ interface SettingsContextType {
     updateClockSettings: (newSettings: Partial<ClockSettings>) => void;
     immichSettings: ImmichSettings;
     updateImmichSettings: (newSettings: Partial<ImmichSettings>) => void;
+    generalSettings: GeneralSettings;
+    updateGeneralSettings: (newSettings: Partial<GeneralSettings>) => void;
     isInitialized: boolean;
 }
 
@@ -105,6 +111,10 @@ const defaultImmichSettings: ImmichSettings = {
     selectionMode: "albums",
 };
 
+const defaultGeneralSettings: GeneralSettings = {
+    language: "en",
+};
+
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
@@ -114,6 +124,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
         useState<ClockSettings>(defaultClockSettings);
     const [immichSettings, setImmichSettings] = useState<ImmichSettings>(
         defaultImmichSettings,
+    );
+    const [generalSettings, setGeneralSettings] = useState<GeneralSettings>(
+        defaultGeneralSettings,
     );
     const [isInitialized, setInitialized] = useState(false);
 
@@ -163,6 +176,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
             }
         }
 
+        const storedGeneral = localStorage.getItem("general");
+        if (storedGeneral) {
+            try {
+                const parsed = JSON.parse(storedGeneral);
+                setGeneralSettings({ ...defaultGeneralSettings, ...parsed });
+            } catch (error) {
+                console.error("Error parsing general settings:", error);
+            }
+        }
+
         setInitialized(true);
     }, []);
 
@@ -204,6 +227,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
         return () => clearTimeout(timeoutId);
     }, [immichSettings, isInitialized]);
 
+    useEffect(() => {
+        if (!isInitialized) return;
+
+        const timeoutId = setTimeout(() => {
+            localStorage.setItem("general", JSON.stringify(generalSettings));
+        }, 500);
+
+        return () => clearTimeout(timeoutId);
+    }, [generalSettings, isInitialized]);
+
     const updateWallpaperSettings = useCallback(
         (newSettings: Partial<WallpaperSettings>) => {
             setWallpaperSettings((prev) => ({ ...prev, ...newSettings }));
@@ -225,6 +258,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
         [],
     );
 
+    const updateGeneralSettings = useCallback(
+        (newSettings: Partial<GeneralSettings>) => {
+            setGeneralSettings((prev) => ({ ...prev, ...newSettings }));
+        },
+        [],
+    );
+
     const contextValue = useMemo(
         () => ({
             wallpaperSettings,
@@ -233,6 +273,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
             updateClockSettings,
             immichSettings,
             updateImmichSettings,
+            generalSettings,
+            updateGeneralSettings,
             isInitialized,
         }),
         [
@@ -242,6 +284,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({
             updateClockSettings,
             immichSettings,
             updateImmichSettings,
+            generalSettings,
+            updateGeneralSettings,
             isInitialized,
         ],
     );

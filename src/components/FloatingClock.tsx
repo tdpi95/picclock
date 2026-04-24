@@ -2,6 +2,8 @@ import { useSettings } from "@/context/SettingsContext";
 import { loadGoogleFont } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
+import { useTranslation } from "@/lib/translations";
+
 type Props = {
     moving?: boolean;
 };
@@ -12,6 +14,7 @@ const PANEL_HEIGHT = 120;
 
 export default function FloatingClock({ moving = true }: Props) {
     const { clockSettings, updateClockSettings } = useSettings();
+    const { t, lang } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
 
     const hourRef = useRef<HTMLSpanElement>(null);
@@ -90,12 +93,15 @@ export default function FloatingClock({ moving = true }: Props) {
         if (ampmRef.current) ampmRef.current.textContent = ampm;
 
         if (dateRef.current) {
-            dateRef.current.textContent = now.toLocaleDateString(undefined, {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-            });
+            dateRef.current.textContent = now.toLocaleDateString(
+                lang === "vi" ? "vi-VN" : "en-US",
+                {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                },
+            );
         }
     };
 
@@ -359,7 +365,6 @@ export default function FloatingClock({ moving = true }: Props) {
                     </div>
                 </div>
 
-                {/* Date */}
                 <div
                     ref={dateRef}
                     className="opacity-80 drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]"
@@ -368,7 +373,7 @@ export default function FloatingClock({ moving = true }: Props) {
                         fontSize: `${textSize * 0.3}px`,
                     }}
                 >
-                    Loading...
+                    {t("loading")}
                 </div>
             </div>
         </div>

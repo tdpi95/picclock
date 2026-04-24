@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { SiImmich } from "react-icons/si";
 import { ImmichSettingsDialog } from "@/components/ImmichSettingsDialog";
 
+import { useTranslation } from "@/lib/translations";
+
 type PanelType =
     | "main"
     | "photoSelector"
@@ -25,6 +27,7 @@ const WallpaperSettings: React.FC = () => {
         immichSettings,
         updateImmichSettings,
     } = useSettings();
+    const { t } = useTranslation();
     const [showedPanel, setShowedPanel] = useState<PanelType>("main");
     const [isImmichSettingsOpen, setIsImmichSettingsOpen] = useState(false);
     const [intervalMinutes, setIntervalMinutes] = useState<number | "">(
@@ -32,9 +35,9 @@ const WallpaperSettings: React.FC = () => {
     );
     const [wakeLockValue, setWakeLockValue] = useState<number | string>(
         wallpaperSettings.wakeLockDuration === -1
-            ? "Disabled"
+            ? t("disabled")
             : wallpaperSettings.wakeLockDuration === 0
-              ? "Always on"
+              ? t("alwaysOn")
               : wallpaperSettings.wakeLockDuration / 60000,
     );
 
@@ -135,9 +138,9 @@ const WallpaperSettings: React.FC = () => {
         console.log("Wake lock value change:", value);
         setWakeLockValue(value);
         let duration;
-        if (value === "Disabled") {
+        if (value === t("disabled")) {
             duration = -1;
-        } else if (value === "Always on") {
+        } else if (value === t("alwaysOn")) {
             duration = 0;
         } else if (typeof value === "number") {
             duration = value * 60000;
@@ -299,7 +302,7 @@ const WallpaperSettings: React.FC = () => {
     return (
         <div className="p-4">
             <FieldGroup>
-                <FormField label="Photo source" orientation="vertical">
+                <FormField label={t("photoSource")} orientation="vertical">
                     <RadioGroup
                         value={wallpaperSettings.imageSource}
                         onValueChange={updateImageSource}
@@ -308,20 +311,20 @@ const WallpaperSettings: React.FC = () => {
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="picsum" id="picsum" />
                             <label htmlFor="picsum">
-                                Picsum (random photos)
+                                {t("picsum")}
                             </label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="bing" id="bing" />
-                            <label htmlFor="bing">Bing Image of the Day</label>
+                            <label htmlFor="bing">{t("bing")}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="local" id="local" />
-                            <label htmlFor="local">Local photos</label>
+                            <label htmlFor="local">{t("local")}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="immich" id="immich" />
-                            <label htmlFor="immich">Immich</label>
+                            <label htmlFor="immich">{t("immich")}</label>
                         </div>
                         {/* <div className="flex items-center space-x-2">
                             <RadioGroupItem
@@ -341,7 +344,7 @@ const WallpaperSettings: React.FC = () => {
                                 onClick={() => setShowedPanel("photoSelector")}
                             >
                                 <LuImageUp />
-                                Manage Photos
+                                {t("managePhotos")}
                             </Button>
                         )}
 
@@ -355,7 +358,7 @@ const WallpaperSettings: React.FC = () => {
                                     }
                                 >
                                     <FiSettings />
-                                    Server Settings
+                                    {t("serverSettings")}
                                 </Button>
                                 <Button
                                     variant="outline-ghost"
@@ -370,7 +373,7 @@ const WallpaperSettings: React.FC = () => {
                                     className="text-amber-500"
                                 >
                                     <SiImmich />
-                                    Select Photos/Albums
+                                    {t("selectPhotosAlbums")}
                                 </Button>
                             </>
                         )}
@@ -414,12 +417,12 @@ const WallpaperSettings: React.FC = () => {
 
                 {wallpaperSettings.imageSource !== "bing" && (
                     <FormField
-                        label="Image change interval"
+                        label={t("imageChangeInterval")}
                         orientation="horizontal"
                     >
                         <NumberSelect
                             values={[1, 5, 10, 30, 60]}
-                            unit="minute"
+                            unit={t("minute")}
                             selectedValue={intervalMinutes}
                             min={1}
                             onValueChange={handleInterValMinutesChange}
@@ -427,17 +430,17 @@ const WallpaperSettings: React.FC = () => {
                     </FormField>
                 )}
 
-                <FormField label="Keep screen on" orientation="horizontal">
+                <FormField label={t("keepScreenOn")} orientation="horizontal">
                     <NumberSelect
-                        values={["Disabled", "Always on", 5, 10, 30]}
-                        unit="minute"
+                        values={[t("disabled"), t("alwaysOn"), 5, 10, 30]}
+                        unit={t("minute")}
                         selectedValue={wakeLockValue}
                         min={1}
                         onValueChange={handleWakeLockValueChange}
                     />
                 </FormField>
 
-                <FormField label="Transition effect" orientation="vertical">
+                <FormField label={t("transitionEffect")} orientation="vertical">
                     <RadioGroup
                         value={wallpaperSettings.transitionType}
                         onValueChange={updateTransitionType}
@@ -445,43 +448,43 @@ const WallpaperSettings: React.FC = () => {
                     >
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="fade" id="fade" />
-                            <label htmlFor="fade">Fade</label>
+                            <label htmlFor="fade">{t("fade")}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="blur" id="blur" />
-                            <label htmlFor="blur">Blur</label>
+                            <label htmlFor="blur">{t("blur")}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="slide" id="slide" />
-                            <label htmlFor="slide">Slide (Horizontal)</label>
+                            <label htmlFor="slide">{t("slideHorizontal")}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="slideVertical" id="slideVertical" />
-                            <label htmlFor="slideVertical">Slide (Vertical)</label>
+                            <label htmlFor="slideVertical">{t("slideVertical")}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="zoomOut" id="zoomOut" />
-                            <label htmlFor="zoomOut">Zoom Out</label>
+                            <label htmlFor="zoomOut">{t("zoomOut")}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="kenBurns" id="kenBurns" />
-                            <label htmlFor="kenBurns">Ken Burns</label>
+                            <label htmlFor="kenBurns">{t("kenBurns")}</label>
                         </div>
                     </RadioGroup>
                 </FormField>
 
-                <FormField label="Wallpaper position" orientation="vertical">
+                <FormField label={t("wallpaperPosition")} orientation="vertical">
                     <RadioGroup
                         value={wallpaperSettings.wallpaperPosition}
                         onValueChange={updateWallpaperPosition}
                     >
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="fill" id="fill" />
-                            <label htmlFor="fill">Fill</label>
+                            <label htmlFor="fill">{t("fill")}</label>
                         </div>
                         <div className="flex items-center space-x-2">
                             <RadioGroupItem value="fit" id="fit" />
-                            <label htmlFor="fit">Fit</label>
+                            <label htmlFor="fit">{t("fit")}</label>
                         </div>
                     </RadioGroup>
                 </FormField>
