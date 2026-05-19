@@ -24,7 +24,7 @@ const FormField: React.FC<FormFieldProps> = ({
 
     return (
         <div
-            className={`rounded-md border border-primary/60 p-4 ${isHorizontal ? "flex items-center gap-4" : "flex flex-col gap-2"} ${className}`}
+            className={`rounded-md border border-primary/60 p-4 custom-form-field ${isHorizontal ? "flex items-center gap-4 max-sm:flex-col max-sm:items-start max-sm:gap-2" : "flex flex-col gap-2"} ${className}`}
         >
             <label
                 className={`
@@ -37,9 +37,9 @@ const FormField: React.FC<FormFieldProps> = ({
             </label>
 
             {isHorizontal ? (
-                <div className="ml-auto">{children}</div>
+                <div className="ml-auto custom-form-field-control max-sm:ml-0 max-sm:w-full">{children}</div>
             ) : (
-                <div>{children}</div>
+                <div className="w-full">{children}</div>
             )}
         </div>
     );

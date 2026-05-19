@@ -267,9 +267,6 @@ export default function FloatingClock({ moving = true }: Props) {
         20 * Math.pow(1.15, clockSettings.fontSize - 1),
     );
 
-    const paddingX = textSize / 2;
-    const paddingTop = textSize / 4;
-    const paddingBottom = textSize / 2;
 
     return (
         <div
@@ -302,12 +299,9 @@ export default function FloatingClock({ moving = true }: Props) {
                 }
             `}</style>
             <div
-                className={`${clockSettings.bgBlur ? "backdrop-blur-md bg-white/10 border border-white/20" : "bg-black/10"} shadow-lg rounded-2xl text-center text-white flex flex-col justify-center transition-transform ${isDragging ? "scale-105" : "scale-100"} ${wobbling ? "animate-wobble" : ""}`}
+                className={`${clockSettings.bgBlur ? "backdrop-blur-md bg-white/10 border border-white/20" : "bg-black/10"} shadow-lg rounded-2xl text-center text-white flex flex-col justify-center transition-transform ${isDragging ? "scale-105" : "scale-100"} ${wobbling ? "animate-wobble" : ""} floating-clock-card`}
                 style={{
-                    paddingLeft: `${paddingX}px`,
-                    paddingRight: `${paddingX}px`,
-                    paddingTop: `${paddingTop}px`,
-                    paddingBottom: `${paddingBottom}px`,
+                    fontSize: `${textSize}px`,
                 }}
             >
                 {/* Time */}
@@ -322,18 +316,18 @@ export default function FloatingClock({ moving = true }: Props) {
                         ref={hourRef}
                         className="font-semibold inline-block text-right"
                         style={{
-                            fontSize: `${textSize}px`,
+                            fontSize: "1em",
                             minWidth: "1em",
                         }}
                     >
                         00
                     </span>
-                    <span style={{ fontSize: `${textSize}px` }}>:</span>
+                    <span style={{ fontSize: "1em" }}>:</span>
                     <span
                         ref={minuteRef}
                         className="inline-block text-left"
                         style={{
-                            fontSize: `${textSize}px`,
+                            fontSize: "1em",
                             minWidth: "1em",
                         }}
                     >
@@ -345,7 +339,7 @@ export default function FloatingClock({ moving = true }: Props) {
                                 ref={ampmRef}
                                 className="absolute bottom-[100%] left-0 opacity-70 leading-none"
                                 style={{
-                                    fontSize: `${textSize * 0.3}px`,
+                                    fontSize: "0.3em",
                                 }}
                             >
                                 AM
@@ -356,7 +350,7 @@ export default function FloatingClock({ moving = true }: Props) {
                             ref={secondRef}
                             className="inline-block"
                             style={{
-                                fontSize: `${textSize * 0.3}px`,
+                                fontSize: "0.3em",
                                 minWidth: "2ch",
                             }}
                         >
@@ -370,7 +364,7 @@ export default function FloatingClock({ moving = true }: Props) {
                     className="opacity-80 drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]"
                     style={{
                         fontFamily: `'${clockSettings.font}', sans-serif`,
-                        fontSize: `${textSize * 0.3}px`,
+                        fontSize: "0.3em",
                     }}
                 >
                     {t("loading")}

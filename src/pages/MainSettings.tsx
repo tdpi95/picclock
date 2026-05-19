@@ -27,7 +27,7 @@ const MainSettings: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <TabsTrigger value="general">{t("other")}</TabsTrigger>
                     </TabsList>
                     {/* use fixed height "h-[50vh]" if content is too long */}
-                    <div className="min-h-[40vh] max-h-[60vh] overflow-y-auto">
+                    <div className="min-h-[40vh] max-h-[60vh] overflow-y-auto settings-scroll-container pr-1">
                         <TabsContent value="wallpaper">
                             <WallpaperSettings />
                         </TabsContent>

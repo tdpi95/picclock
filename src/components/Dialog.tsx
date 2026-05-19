@@ -39,26 +39,26 @@ export const Dialog: React.FC<DialogProps> = ({
             {/* Panel */}
             <div
                 className={cn(
-                    "relative z-10 w-full md:max-w-2xl lg:max-w-3xl mx-4 rounded-xl bg-white/40 backdrop-blur-xl shadow-xl p-6",
+                    "relative z-10 w-full md:max-w-2xl lg:max-w-3xl mx-4 rounded-xl bg-white/40 backdrop-blur-xl shadow-xl p-6 custom-dialog-panel max-sm:mx-2 max-sm:p-4 max-sm:rounded-lg",
                     className,
                 )}
                 onClick={(e) => e.stopPropagation()}
             >
                 <button
                     onClick={onClose}
-                    className="absolute top-3 right-4 text-gray-700 hover:text-black transition"
+                    className="absolute top-3 right-4 text-gray-700 hover:text-black transition custom-dialog-close max-sm:top-4 max-sm:right-4 max-sm:p-2 max-sm:text-xl"
                     aria-label="Close dialog"
                 >
                     ✕
                 </button>
 
                 {header && (
-                    <h2 className="text-lg font-semibold mb-4 pr-8">
+                    <h2 className="text-lg font-semibold mb-4 pr-8 custom-dialog-header max-sm:text-xl max-sm:mb-3">
                         {header}
                     </h2>
                 )}
 
-                <div>{children}</div>
+                <div className="custom-dialog-body">{children}</div>
 
                 {footer && (
                     <div className="mt-4 pt-2 flex justify-end gap-2">

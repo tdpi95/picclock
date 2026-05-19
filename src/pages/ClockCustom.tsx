@@ -122,7 +122,7 @@ const ClockCustom = () => {
                     </Button>
                 </FormField>
                 <FormField label={t("size")} orientation="horizontal">
-                    <div className="flex items-center gap-4 w-48">
+                    <div className="flex items-center gap-4 w-48 custom-slider-wrapper max-sm:w-full">
                         <Slider
                             min={1}
                             max={20}

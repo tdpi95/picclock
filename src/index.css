@@ -237,3 +237,157 @@
     --animate-blur-in: blur-in 2s ease-out forwards;
     --animate-ken-burns: ken-burns 60s ease-in-out infinite;
 }
+
+/* Floating Clock responsive padding */
+.floating-clock-card {
+    /* Thicker padding on desktop */
+    padding-top: 0.3em !important;
+    padding-bottom: 0.4em !important;
+    padding-left: 0.7em !important;
+    padding-right: 0.7em !important;
+}
+
+/* Custom responsive scaling for Dialog and settings controls on mobile devices */
+@media (max-width: 640px), (max-height: 480px) {
+    /* Dialog Panel adjustment */
+    .custom-dialog-panel {
+        font-size: 1.1rem !important; /* Scale up base font size */
+        margin-left: 0.5rem !important;
+        margin-right: 0.5rem !important;
+        padding: 1rem !important;
+        width: calc(100% - 1rem) !important;
+        max-width: 500px !important;
+    }
+
+    /* Dialog headers */
+    .custom-dialog-header {
+        font-size: 1.35rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    /* Form labels & titles */
+    .custom-dialog-panel label,
+    .custom-dialog-panel [data-slot="field-label"] {
+        font-size: 1.1rem !important;
+    }
+
+    /* Form control elements, select/combobox triggers, text inputs, etc. */
+    .custom-dialog-panel [data-slot="select-trigger"],
+    .custom-dialog-panel input[type="text"],
+    .custom-dialog-panel input[type="number"],
+    .custom-dialog-panel input[type="url"],
+    .custom-dialog-panel input[type="password"] {
+        font-size: 1.1rem !important;
+        height: 2.75rem !important; /* Larger touch target height (44px) */
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    /* Dropdown/Select Menu items */
+    [data-slot="select-content"] [data-slot="select-item"] {
+        font-size: 1.1rem !important;
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+
+    /* Buttons scaling */
+    .custom-dialog-panel [data-slot="button"],
+    .custom-dialog-panel button:not(.custom-dialog-close):not([data-slot="radio-group-item"]):not([data-slot="switch"]):not([data-slot="tabs-trigger"]):not([data-slot="select-trigger"]) {
+        font-size: 1.05rem !important;
+        height: 2.75rem !important; /* Larger touch target height */
+        padding-left: 1.25rem !important;
+        padding-right: 1.25rem !important;
+        border-radius: 0.5rem !important;
+    }
+    
+    /* Make smaller/ghost buttons inside settings scale well too */
+    .custom-dialog-panel [data-slot="button"][data-size="sm"] {
+        height: 2.5rem !important;
+        font-size: 1rem !important;
+    }
+
+    /* Tabs list & triggers scaling */
+    .custom-dialog-panel [data-slot="tabs-list"] {
+        height: auto !important;
+        padding: 4px !important;
+    }
+
+    .custom-dialog-panel [data-slot="tabs-trigger"] {
+        font-size: 1.1rem !important;
+        padding-top: 0.65rem !important;
+        padding-bottom: 0.65rem !important;
+        height: 2.5rem !important;
+    }
+
+    /* Radio Group items scaling */
+    .custom-dialog-panel [data-slot="radio-group-item"] {
+        width: 1.5rem !important;
+        height: 1.5rem !important;
+    }
+    
+    .custom-dialog-panel [data-slot="radio-group-item"] svg {
+        width: 0.75rem !important;
+        height: 0.75rem !important;
+    }
+
+    /* Switch components scaling */
+    .custom-dialog-panel [data-slot="switch"] {
+        width: 3.25rem !important;
+        height: 1.85rem !important;
+    }
+
+    .custom-dialog-panel [data-slot="switch-thumb"] {
+        width: 1.6rem !important;
+        height: 1.6rem !important;
+    }
+
+    /* Slider track & thumb scaling */
+    .custom-dialog-panel input[type="range"] {
+        height: 0.65rem !important; /* Thicker track */
+    }
+
+    /* Flex item layout spacing */
+    .custom-dialog-panel .flex-col {
+        gap: 0.75rem !important;
+    }
+
+    /* Spacing between different Field components */
+    .custom-dialog-panel [data-slot="field-group"] {
+        gap: 0.75rem !important;
+    }
+
+    /* Thinner padding for floating clock card on mobile */
+    .floating-clock-card {
+        padding-top: 0.2em !important;
+        padding-bottom: 0.4em !important;
+        padding-left: 0.55em !important;
+        padding-right: 0.55em !important;
+    }
+
+    /* Dialog close button adjustment */
+    .custom-dialog-close {
+        top: 1rem !important;
+        right: 1rem !important;
+        padding: 0.5rem !important;
+        font-size: 1.25rem !important;
+    }
+
+    /* FormField responsive stacking */
+    .custom-dialog-panel .custom-form-field {
+        padding: 0.6rem 0.8rem !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.4rem !important;
+    }
+
+    .custom-dialog-panel .custom-form-field-control {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    .custom-dialog-panel .custom-slider-wrapper {
+        width: 100% !important;
+    }
+}
