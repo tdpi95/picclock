@@ -241,10 +241,10 @@
 /* Floating Clock responsive padding */
 .floating-clock-card {
     /* Thicker padding on desktop */
-    padding-top: 0.3em !important;
-    padding-bottom: 0.4em !important;
-    padding-left: 0.7em !important;
-    padding-right: 0.7em !important;
+    padding-top: 0.12em !important;
+    padding-bottom: 0.35em !important;
+    padding-left: 0.5em !important;
+    padding-right: 0.5em !important;
 }
 
 /* Custom responsive scaling for Dialog and settings controls on mobile devices */
@@ -360,8 +360,8 @@
 
     /* Thinner padding for floating clock card on mobile */
     .floating-clock-card {
-        padding-top: 0.2em !important;
-        padding-bottom: 0.4em !important;
+        padding-top: 0.1em !important;
+        padding-bottom: 0.32em !important;
         padding-left: 0.55em !important;
         padding-right: 0.55em !important;
     }
